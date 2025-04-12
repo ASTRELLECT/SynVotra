@@ -25,7 +25,14 @@ async def get_all_users(
     """
     Get all users
     """
-    pass
+    users = db.query(User).all()
+    logger.info(f"Found {len(users)} users")
+    if not users:
+        logger.warning(f"404 - No users found {users}")
+        raise HTTPException(status_code=404, detail="No users found")
+    return users
+
+
 
 @users_router.post("/create", response_model=UserResponse)
 async def create_user(

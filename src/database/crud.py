@@ -1,15 +1,22 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
-from passlib.context import CryptContext
+from .utils import get_password_hash
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def get_user_by_username(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
+def create_role(db: Session, role: schemas.RoleCreate):
+    db_role = models.Role(**role.model_dump())
+    db.add(db_role)
+    db.commit()
+    db.refresh(db_role)
+    return db_role
 
-def create_user(db: Session, user: schemas.UserCreate, is_admin=False):
-    hashed_password = pwd_context.hash(user.password)
-    db_user = models.User(username=user.username, password=hashed_password, is_admin=is_admin)
+def get_roles(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Role).offset(skip).limit(limit).all()
+
+def create_user(db: Session, user: schemas.UserCreate):
+    hashed_password = get_password_hash(user.password)
+    user_data = user.model_dump(exclude={"password"})
+    db_user = models.User(**user_data, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
