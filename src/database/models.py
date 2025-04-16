@@ -73,7 +73,7 @@ class AttendanceRecord(Base):
     clock_in_time = Column(DateTime)
     clock_out_time = Column(DateTime)
     total_hours = Column(Float)
-    status = Column(String)  # Present/Absent/Half-day/etc.
+    status = Column(String)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     

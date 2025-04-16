@@ -13,7 +13,7 @@ def init():
     admin_user = db.query(User).filter(User.email == "admin@astrellect.com").first()
     if not admin_user:
         new_user = User(
-            name="Admin",
+            first_name="Admin",  # Changed from name to first_name
             email="admin@astrellect.com",
             hashed_password=get_password_hash("Amit@123#"),
             is_admin=True,
@@ -26,6 +26,3 @@ def init():
 
 if __name__ == "__main__":
     init()
-
-# This script initializes the database and creates an admin user if it doesn't exist.
-# It uses SQLAlchemy to interact with the database and assumes that the User model
