@@ -1,271 +1,428 @@
-Here is a complete `README.md` file template for your FastAPI project with Alembic and SQLite for database management:
+# Astrellect API
 
----
-
-# FastAPI Project with Alembic and SQLite
-
-This is a FastAPI project that uses Alembic for database migrations and SQLite as the database engine. The guide below covers how to set up, configure, and manage your database, including creating tables, adding new columns, and running migrations.
-
----
+A FastAPI-powered backend API created by Team Astrellect.
 
 ## Table of Contents
 
-- [Project Setup](#project-setup)
-- [Database Setup](#database-setup)
+- [Prerequisites](#prerequisites)
+- [Setup Instructions](#setup-instructions)
+  - [Ubuntu Setup](#ubuntu-setup)
+  - [Windows Setup](#windows-setup)
+- [Database Management](#database-management)
+  - [Setting Up Alembic](#setting-up-alembic)
+  - [Creating Migrations](#creating-migrations)
+  - [Running Migrations](#running-migrations)
+  - [Verifying Database Structure](#verifying-database-structure)
 - [Running the Application](#running-the-application)
-- [Database Management with Alembic](#database-management-with-alembic)
-  - [1. Create New Tables/Columns](#1-create-new-tablescolumns)
-  - [2. Generate Migrations](#2-generate-migrations)
-  - [3. Apply Migrations](#3-apply-migrations)
-  - [4. Database Initialization Script](#4-database-initialization-script)
-- [Testing the Application](#testing-the-application)
-- [Deployment](#deployment)
-- [Troubleshooting](#troubleshooting)
+- [API Documentation](#api-documentation)
+- [Project Structure](#project-structure)
+- [Development Workflows](#development-workflows)
+  - [Adding New Models](#adding-new-models)
+  - [Updating Existing Models](#updating-existing-models)
+  - [Database Reset](#database-reset)
 
----
+## Prerequisites
 
-## Project Setup
+- Python 3.8+
+- pip (Python package installer)
+- Git (optional, for cloning the repository)
 
-### 1. Clone the repository:
+## Setup Instructions
+
+### Ubuntu Setup
+
+1. **Clone the repository** (if using Git):
+
+   ```bash
+   git clone https://github.com/ASTRELLECT/SynVotra.git
+   cd SynVotra
+   ```
+
+2. **Create and activate a virtual environment**:
+
+   ```bash
+   python3 -m venv ast_env
+   source ast_env/bin/activate
+   ```
+
+3. **Install dependencies**:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   If requirements.txt is missing, install these packages:
+
+   ```bash
+   pip install fastapi uvicorn sqlalchemy passlib bcrypt python-jose pydantic alembic python-multipart jinja2
+   ```
+
+4. **Create database directory**:
+
+   ```bash
+   mkdir -p database
+   ```
+
+5. **Initialize the database**:
+
+   ```bash
+   # Create database and tables
+   python src/database/init_db.py
+   ```
+
+### Windows Setup
+
+1. **Clone the repository** (if using Git):
+
+   ```cmd
+   git clone https://github.com/ASTRELLECT/SynVotra.git
+   cd SynVotra
+   ```
+
+2. **Create and activate a virtual environment**:
+
+   ```cmd
+   python -m venv ast_env
+   ast_env\Scripts\activate
+   ```
+
+3. **Install dependencies**:
+
+   ```cmd
+   pip install -r requirements.txt
+   ```
+
+   If requirements.txt is missing, install these packages:
+
+   ```cmd
+   pip install fastapi uvicorn sqlalchemy passlib bcrypt python-jose pydantic alembic python-multipart jinja2
+   ```
+
+4. **Create database directory**:
+
+   ```cmd
+   mkdir database
+   ```
+
+5. **Initialize the database**:
+
+   ```cmd
+   python src\database\init_db.py
+   ```
+
+## Database Management
+
+### Setting Up Alembic
+
+Alembic is used for database migrations. Here's how to set it up:
+
+#### Ubuntu
 
 ```bash
-git clone https://github.com/yourusername/yourproject.git
-cd yourproject
+# Install Alembic if not already installed
+pip install alembic
+
+# Initialize Alembic in your project
+alembic init alembic
 ```
 
-### 2. Set up a virtual environment:
+#### Windows
 
-For Python 3.10 or higher:
+```cmd
+pip install alembic
+alembic init alembic
+```
+
+After initialization, you'll need to edit the `alembic.ini` file:
+
+1. Update the `sqlalchemy.url` to point to your database:
+   ```
+   sqlalchemy.url = sqlite:///./database/astrellect.db
+   ```
+
+2. Edit the `env.py` file in the alembic directory to import your models:
+   ```python
+   # Add these lines near the top of the file
+   import sys
+   import os
+   sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+   
+   # Import your models and Base
+   from src.database import Base
+   from src.database.models import User, Role, Session, PasswordResetToken, AttendanceRecord
+   
+   # Update target_metadata
+   target_metadata = Base.metadata
+   ```
+
+### Creating Migrations
+
+When you make changes to your models, create a new migration:
+
+#### Ubuntu
 
 ```bash
-python3 -m venv ast_env
-source ast_env/bin/activate  # On Windows use: ast_env\Scripts\activate
+# Create an initial migration
+alembic revision --autogenerate -m "Initial migration"
+
+# Create migration after model changes
+alembic revision --autogenerate -m "Description of changes"
 ```
 
-### 3. Install the dependencies:
+#### Windows
+
+```cmd
+alembic revision --autogenerate -m "Initial migration"
+alembic revision --autogenerate -m "Description of changes"
+```
+
+### Running Migrations
+
+To apply all pending migrations:
+
+#### Ubuntu
+
+```bash
+alembic upgrade head
+```
+
+#### Windows
+
+```cmd
+alembic upgrade head
+```
+
+To apply a specific migration (replace `revision_id` with your migration ID):
+
+```bash
+alembic upgrade revision_id
+```
+
+To downgrade to a previous migration:
+
+```bash
+alembic downgrade -1  # Go back one migration
+```
+
+To see migration history:
+
+```bash
+alembic history
+```
+
+To see current revision:
+
+```bash
+alembic current
+```
+
+### Verifying Database Structure
+
+You can check your database structure using the provided check_database.py script:
+
+#### Ubuntu
+
+```bash
+python check_database.py
+```
+
+#### Windows
+
+```cmd
+python check_database.py
+```
+
+This will show all tables in your database along with their columns, helping you verify that everything is set up correctly.
+
+## Running the Application
+
+### Ubuntu
+
+```bash
+# With Uvicorn directly
+uvicorn src.main:_get_app --reload
+
+# Or with a host and port specified
+uvicorn src.main:_get_app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Windows
+
+```cmd
+uvicorn src.main:_get_app --reload
+```
+
+The API will be available at http://localhost:8000
+
+## API Documentation
+
+Once the server is running, you can access:
+
+- Swagger UI documentation: http://localhost:8000/docs
+- ReDoc documentation: http://localhost:8000/redoc
+
+## Project Structure
+
+```
+SynVotra/
+│
+├── alembic/                 # Alembic migrations directory
+│   ├── versions/            # Migration versions
+│   └── env.py               # Alembic environment configuration
+│
+├── alembic.ini              # Alembic configuration file
+│
+├── check_database.py        # Script to verify database structure
+│
+├── database/                # Database directory
+│   └── astrellect.db        # SQLite database file
+│
+├── requirements.txt         # Python dependencies
+│
+├── src/                     # Application source code
+│   ├── database/            # Database related modules
+│   │   ├── __init__.py      # Database connection setup
+│   │   ├── base.py          # SQLAlchemy Base
+│   │   ├── crud.py          # CRUD operations
+│   │   ├── init_db.py       # Database initialization
+│   │   ├── models.py        # SQLAlchemy models
+│   │   ├── schemas.py       # Pydantic schemas
+│   │   └── utils.py         # Database utilities
+│   │
+│   ├── main.py              # Main application entry point
+│   │
+│   ├── pydantic_model/      # Pydantic schemas
+│   │   ├── pages.py         # Page schemas
+│   │   └── users.py         # User schemas
+│   │
+│   ├── resources/           # Resources and constants
+│   │   └── constants.py     # Application constants
+│   │
+│   └── routes/              # API routes
+│       ├── __init__.py      # Routes registration
+│       ├── pages.py         # Pages endpoints
+│       └── users.py         # Users endpoints
+│
+├── static/                  # Static files
+│
+└── templates/               # Jinja2 templates
+```
+
+## Development Workflows
+
+### Adding New Models
+
+When adding new models to your application:
+
+1. **Define the model** in `src/database/models.py`
+2. **Create Pydantic schemas** for API requests/responses
+3. **Create a migration**:
+   ```bash
+   alembic revision --autogenerate -m "Add new model"
+   ```
+4. **Apply the migration**:
+   ```bash
+   alembic upgrade head
+   ```
+5. **Create API routes** in the appropriate files
+6. **Register the routes** in `src/routes/__init__.py`
+
+### Updating Existing Models
+
+When modifying existing models:
+
+1. **Update the model definition** in `src/database/models.py`
+2. **Update any affected Pydantic schemas**
+3. **Create a migration for the changes**:
+   ```bash
+   alembic revision --autogenerate -m "Update model"
+   ```
+4. **Apply the migration**:
+   ```bash
+   alembic upgrade head
+   ```
+5. **Update any affected API handlers**
+
+### Database Reset
+
+If you need to reset your database during development:
+
+#### Ubuntu
+
+```bash
+# Remove the existing database
+rm -f database/astrellect.db
+
+# Initialize the database
+python src/database/init_db.py
+
+# Apply migrations
+alembic upgrade head
+```
+
+#### Windows
+
+```cmd
+del database\astrellect.db
+python src\database\init_db.py
+alembic upgrade head
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**1. bcrypt version error:**
+
+If you see an error message about bcrypt version:
+
+```
+(trapped) error reading bcrypt version
+```
+
+Try upgrading both bcrypt and passlib:
+
+```bash
+pip install --upgrade bcrypt passlib
+```
+
+**2. SQLite database does not exist:**
+
+Make sure the database directory exists:
+
+```bash
+# Ubuntu
+mkdir -p database
+
+# Windows
+mkdir database
+```
+
+**3. Tables not creating properly:**
+
+Run the check_database.py script to verify the database state:
+
+```bash
+python check_database.py
+```
+
+**4. Alembic can't find models:**
+
+Make sure your models are properly imported in the Alembic env.py file and that your project structure is correctly configured in the Python path.
+
+**5. Alembic migration fails with "Can't locate revision":**
+
+You might need to create a base migration first:
+
+```bash
+alembic revision --autogenerate -m "Initial migration"
+alembic upgrade head
+```
+
+**6. Missing dependencies:**
+
+If you get import errors, make sure you've installed all required packages:
 
 ```bash
 pip install -r requirements.txt
 ```
-
----
-
-## Database Setup
-
-The project uses SQLite by default for simplicity, but you can configure it to use any database supported by SQLAlchemy.
-
-### 1. Install SQLite (if not installed):
-
-SQLite comes pre-installed with Python. If you're using a different database (e.g., PostgreSQL or MySQL), install the required drivers:
-
-```bash
-pip install psycopg2  # For PostgreSQL
-pip install mysqlclient  # For MySQL
-```
-
-### 2. Set up Alembic:
-
-Alembic is a database migration tool for SQLAlchemy. To set it up:
-
-```bash
-alembic init alembic
-```
-
-This will create an `alembic/` folder and an `alembic.ini` file. The `alembic.ini` file contains the configuration settings for your database connection.
-
----
-
-## Running the Application
-
-### 1. Set up the database URL:
-
-In the `alembic.ini` file, set the `sqlalchemy.url` to point to your SQLite database (or any other supported database).
-
-For SQLite:
-
-```ini
-sqlalchemy.url = sqlite:///./test.db
-```
-
-### 2. Create your database tables:
-
-FastAPI uses SQLAlchemy for database interactions. The tables are defined in `src/models.py`. Ensure the models are properly set up before applying migrations.
-
-### 3. Run the FastAPI app:
-
-To run the application:
-
-```bash
-uvicorn src.main:app --reload
-```
-
-Your application will be running at `http://localhost:8000`.
-
----
-
-## Database Management with Alembic
-
-Alembic is used to handle schema changes (like adding new columns or tables). Follow the steps below to manage database migrations:
-
-### 1. Create New Tables/Columns
-
-To add new tables or columns, edit the SQLAlchemy models in `src/models.py`. For example, to add a new `date_of_birth` column to the `User` table:
-
-```python
-from sqlalchemy import Column, Integer, String, Boolean
-from src.database import Base
-
-class User(Base):
-    __tablename__ = 'users'
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    is_admin = Column(Boolean, default=False)
-    date_of_birth = Column(String, nullable=True)  # New column
-```
-
-### 2. Generate Migrations
-
-After modifying your models, generate a new Alembic migration to reflect the changes in the database:
-
-```bash
-alembic revision --autogenerate -m "Added date_of_birth column to users table"
-```
-
-Alembic will compare the current database schema with the models and generate a migration file in the `alembic/versions/` folder.
-
-### 3. Apply Migrations
-
-To apply the migration and update the database schema, run:
-
-```bash
-alembic upgrade head
-```
-
-This command will apply all pending migrations, updating the database schema accordingly.
-
-### 4. Database Initialization Script
-
-If you need to populate the database with initial data (like creating an admin user), use a script like `init_db.py`.
-
-Here’s an example of how to create an admin user:
-
-```python
-from sqlalchemy.orm import Session
-from src.database import SessionLocal, engine
-from src.models import User
-
-def init():
-    db = SessionLocal()
-    admin_user = db.query(User).filter(User.email == "admin@astrellect.com").first()
-    
-    if not admin_user:
-        admin_user = User(
-            name="Admin",
-            email="admin@astrellect.com",
-            hashed_password="Amit@123#",  # Hash this password using a proper method in production
-            is_admin=True
-        )
-        db.add(admin_user)
-        db.commit()
-        db.refresh(admin_user)
-        print("✅ Admin user created")
-    else:
-        print("Admin user already exists.")
-
-if __name__ == "__main__":
-    init()
-```
-
-To run the script:
-
-```bash
-python src/database/init_db.py
-```
-
-This will ensure that the required initial data (like the admin user) is added to your database.
-
----
-
-## Testing the Application
-
-### 1. Run Tests
-
-You can use FastAPI's test client to test your API. For example:
-
-```python
-from fastapi.testclient import TestClient
-from src.main import app
-
-client = TestClient(app)
-
-def test_create_user():
-    response = client.post(
-        "/users/",
-        json={"name": "John", "email": "john@example.com", "password": "securepassword", "date_of_birth": "1990-01-01"}
-    )
-    assert response.status_code == 200
-    assert response.json()["email"] == "john@example.com"
-```
-
-Run the tests using:
-
-```bash
-pytest
-```
-
-### 2. Database Testing
-
-Ensure that the database updates are reflected in your tests. You can use a test database to run your migrations and test cases.
-
----
-
-## Deployment
-
-### 1. Prepare for Production
-
-Before deploying to production, ensure that all database migrations are applied. Run the following in your production environment:
-
-```bash
-alembic upgrade head
-```
-
-### 2. Run the Application
-
-To run the application in production, use the `uvicorn` command:
-
-```bash
-uvicorn src.main:_get_app
----
-
-## Troubleshooting
-
-### 1. Error: `sqlite3.OperationalError: no such table: users`
-
-This error occurs when the database schema is outdated. Make sure that migrations have been applied:
-
-```bash
-alembic upgrade head
-```
-
-### 2. Error: `trapped error reading bcrypt version`
-
-This error indicates an issue with the `bcrypt` library. Ensure it's installed properly:
-
-```bash
-pip install bcrypt
-```
-
-Also, check for version compatibility between `passlib` and `bcrypt`.
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-This `README.md` file serves as a guide for setting up, managing, and deploying a FastAPI project with Alembic and SQLite. It covers everything from installing dependencies to applying database migrations and deploying your application to production.
