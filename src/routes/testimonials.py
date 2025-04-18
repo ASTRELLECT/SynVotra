@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from src.pydantic_model.testimonials import TestimonialCreate, TestimonialUpdate, TestimonialResponse
 from src.database.models import Testimonial
 from src.database import get_db
 
