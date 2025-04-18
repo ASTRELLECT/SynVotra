@@ -2,7 +2,7 @@ from typing import List
 import uuid
 import logging
 from fastapi import APIRouter, HTTPException, Depends, status
-from src.pydantic_model.users import UserCreate, UserUpdate, UserResponse
+from src.pydantic_model.users import UserCreate, UserUpdate, UserResponse, UserAttribute
 from src.database.models import User, UserRole
 from src.utils.utils import get_password_hash
 from sqlalchemy.orm import Session
@@ -21,8 +21,6 @@ users_router = APIRouter(
 
 @users_router.get("/getall", response_model=List[UserResponse])
 async def get_all_users(
-    skip: int = 0,
-    limit: int = 100,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -31,14 +29,86 @@ async def get_all_users(
     
     Requires: Valid JWT token
     """
-    if not current_user.is_admin:
-        return [current_user]
-    
-    users = db.query(User).offset(skip).limit(limit).all()
-    logger.info(f"Found {len(users)} users")
-    return users
+    try:
+        if not current_user.is_admin:
+            return [current_user]
+        
+        users = db.query(User).all()
+        logger.info(f"Found {len(users)} users")
+        return users
+    except Exception as e:
+        logger.error(f"Unexpected error retrieving users: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred"
+        )
 
 
+@users_router.get("/filter", response_model=List[UserResponse])
+async def filter_users_by_attributes(
+    attributes: UserAttribute = Depends(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get users filtered by any combination of attributes.
+    Requires: Valid JWT token. Only admins can filter users.
+    """
+    try:
+        if not current_user.is_admin:
+            logger.warning(f"403 - User {current_user.id} attempted to filter users by attributes")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not enough permissions to filter users"
+            )
+    except Exception as e:
+        logger.error(f"Unexpected error checking user permissions: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred"
+        )
+    try:
+        query = db.query(User)
+        filters = []
+        if attributes.email:
+            filters.append(User.email.ilike(f"%{attributes.email}%"))
+        if attributes.first_name:
+            filters.append(User.first_name.ilike(f"%{attributes.first_name}%"))
+        if attributes.last_name:
+            filters.append(User.last_name.ilike(f"%{attributes.last_name}%"))
+        if attributes.role:
+            filters.append(User.role == attributes.role)
+        if attributes.contact_number:
+            filters.append(User.contact_number.ilike(f"%{attributes.contact_number}%"))
+        if attributes.dob:
+            filters.append(User.dob == attributes.dob)
+        if attributes.address:
+            filters.append(User.address.ilike(f"%{attributes.address}%"))
+        if attributes.joining_date:
+            filters.append(User.joining_date == attributes.joining_date)
+        if attributes.is_active is not None:
+            filters.append(User.is_active == attributes.is_active)
+        if attributes.is_admin is not None:
+            filters.append(User.is_admin == attributes.is_admin)
+
+        logger.info(f"Filtering users with attributes: {attributes.json()}")
+        if filters:
+            query = query.filter(*filters)
+
+        users = query.all()
+        if not users:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No users found matching the provided criteria"
+            )
+        return users
+
+    except Exception as e:
+        logger.error(f"Unexpected error filtering users: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred"
+        )
 @users_router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: uuid.UUID,
@@ -49,20 +119,27 @@ async def get_user(
     Get a specific user by ID
     Requires: Valid JWT token. Regular users can only get their own record.
     """
-    if not current_user.is_admin and str(current_user.id) != str(user_id):
-        logger.warning(f"403 - User {current_user.id} attempted to access user {user_id}")
+    try:
+        if not current_user.is_admin and str(current_user.id) != str(user_id):
+            logger.warning(f"403 - User {current_user.id} attempted to access user {user_id}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not enough permissions to access this record"
+            )
+        
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            logger.warning(f"404 - User with ID {user_id} not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return user
+
+    except Exception as e:
+        logger.error(f"Unexpected error retrieving user: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions to access this record"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred"
         )
     
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        logger.warning(f"404 - User with ID {user_id} not found")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return user
-
-
 @users_router.post("/create", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
     user: UserCreate,
@@ -131,18 +208,24 @@ async def update_user(
     Requires: Valid JWT token. Regular users can only update their own record.
     Admins can update any record.
     """
-    if not current_user.is_admin and str(current_user.id) != str(user_id):
-        logger.warning(f"403 - User {current_user.id} attempted to update user {user_id}")
+    try:
+        if not current_user.is_admin and str(current_user.id) != str(user_id):
+            logger.warning(f"403 - User {current_user.id} attempted to update user {user_id}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not enough permissions to update this record"
+            )
+        
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if not db_user:
+            logger.warning(f"404 - User with ID {user_id} not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    except Exception as e:
+        logger.error(f"Unexpected error checking user permissions: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions to update this record"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred"
         )
-    
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if not db_user:
-        logger.warning(f"404 - User with ID {user_id} not found")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    
     try:
         update_data = user_update.model_dump(exclude_unset=True)
         
@@ -192,19 +275,25 @@ async def delete_user(
     
     Requires: Valid JWT token with admin privileges
     """
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if not db_user:
-        logger.warning(f"404 - User with ID {user_id} not found")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    
-    if db_user.is_admin:
-        admin_count = db.query(User).filter(User.is_admin == True, User.is_active == True).count()
-        if admin_count <= 1:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot delete the last admin user"
-            )
-    
+    try:
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if not db_user:
+            logger.warning(f"404 - User with ID {user_id} not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        
+        if db_user.is_admin:
+            admin_count = db.query(User).filter(User.is_admin == True, User.is_active == True).count()
+            if admin_count <= 1:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Cannot delete the last admin user"
+                )
+    except Exception as e:
+        logger.error(f"Unexpected error checking user permissions: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred"
+        )
     try:
         # Option 1: Soft delete (recommended for production systems)
         db_user.is_active = False

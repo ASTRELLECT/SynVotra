@@ -48,3 +48,15 @@ class UserUpdate(BaseModel):
     reporting_manager_id: Optional[uuid.UUID] = None
     is_active: Optional[bool] = None
     is_admin: Optional[bool] = None
+
+class UserAttribute(BaseModel):
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    role: Optional[UserRole] = None
+    contact_number: Optional[str] = None
+    dob: Optional[datetime] = None
+    address: Optional[str] = None
+    joining_date: Optional[datetime] = None
+    is_active: Optional[bool] = None
+    is_admin: Optional[bool] = None
