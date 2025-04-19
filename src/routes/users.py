@@ -109,6 +109,7 @@ async def filter_users_by_attributes(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred"
         )
+        
 @users_router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: uuid.UUID,
