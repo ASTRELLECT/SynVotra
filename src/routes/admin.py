@@ -47,22 +47,3 @@ async def get_all_users(role,
 
     return users
 
-@admin_router.get("/get-manager", response_model=List[UserResponse])
-async def get_all_users(
-    db: SessionLocal = Depends(get_db),
-    
-):
-    """
-    Get all managers
-    """
-    
-    
-    managers = db.query(User).filter(User.role== UserRole.MANAGER).all()
-    
-    logger.info(f"Found {len(managers)} users")
-    if not managers:
-        logger.warning(f"404 - No users found {managers}")
-        raise HTTPException(status_code=404, detail="No users found")
-  
-    
-    return managers
