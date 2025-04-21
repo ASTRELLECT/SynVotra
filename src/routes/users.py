@@ -1,25 +1,34 @@
-from typing import List
 import uuid
 import logging
-from fastapi import APIRouter, HTTPException, Depends, status
-from src.pydantic_model.users import UserCreate, UserUpdate, UserResponse, UserAttribute, AvatarType, AvatarUpdate
-from src.database.models import User, UserRole
-from src.utils.utils import get_password_hash
+from typing import List
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from datetime import datetime
+from sqlalchemy.exc import IntegrityError
+from fastapi import APIRouter, HTTPException, Depends, status
+
 from src.database import get_db
+from src.database.models import User
+from src.utils.utils import get_password_hash
 from src.auth.auth import get_current_user, get_admin_user
+from src.pydantic_model.users import (
+    UserCreate, 
+    UserUpdate, 
+    UserResponse, 
+    UserListResponse,
+    UserAttribute, 
+    AvatarType, 
+    AvatarUpdate
+)
 
 logger = logging.getLogger(__name__)
 
 users_router = APIRouter(
     prefix="/employees",
-    tags=["Users"]
+    tags=["Employees"]
 )
 
 
-@users_router.get("/getall", response_model=List[UserResponse])
+@users_router.get("/getall", response_model=UserListResponse)
 async def get_all_users(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -32,10 +41,9 @@ async def get_all_users(
     try:
         if not current_user.is_admin:
             return [current_user]
-        
         users = db.query(User).all()
-        logger.info(f"Found {len(users)} users")
-        return users
+        logger.info("Users retrieved successfully")
+        return UserListResponse(result=users)
     except Exception as e:
         logger.error(f"Unexpected error retrieving users: {str(e)}")
         raise HTTPException(
@@ -44,7 +52,7 @@ async def get_all_users(
         )
 
 
-@users_router.get("/filter", response_model=List[UserResponse])
+@users_router.get("/filter", response_model=UserListResponse)
 async def filter_users_by_attributes(
     attributes: UserAttribute = Depends(),
     db: Session = Depends(get_db),
@@ -101,7 +109,7 @@ async def filter_users_by_attributes(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No users found matching the provided criteria"
             )
-        return users
+        return UserListResponse(result=users)
 
     except Exception as e:
         logger.error(f"Unexpected error filtering users: {str(e)}")
@@ -264,6 +272,33 @@ async def update_user(
             detail="An unexpected error occurred"
         )
 
+@users_router.put("/update_profile_picture")
+async def update_profile_picture(
+    avatar_update: AvatarUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Update a user's profile picture by selecting one of the predefined avatars
+    """
+    try:
+        user_id = current_user.id
+        db_user = db.query(User).filter(User.id == user_id).first()
+        db_user.profile_picture_url = avatar_update.avatar_type.value
+        db_user.updated_at = datetime.now()
+        db.commit()
+        db.refresh(db_user)
+        logger.info(f"User {current_user.id} updated profile picture for user with ID: {user_id}")
+        return {"message": "Profile picture updated successfully"}
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unexpected error updating profile picture: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred"
+        )
+
 
 @users_router.delete("/delete/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
@@ -296,13 +331,8 @@ async def delete_user(
             detail="An unexpected error occurred"
         )
     try:
-        # Option 1: Soft delete (recommended for production systems)
         db_user.is_active = False
         db_user.updated_at = datetime.now()
-        
-        # Option 2: Hard delete (uncomment if you really want to remove the record)
-        # db.delete(db_user)
-        
         db.commit()
         logger.info(f"Admin {current_user.id} deactivated user with ID: {user_id}")
         return None
@@ -315,52 +345,4 @@ async def delete_user(
             detail="An unexpected error occurred"
         )
 
-@users_router.put("/update_profile_picture/{user_id}", response_model=UserResponse)
-async def update_profile_picture(
-    user_id: uuid.UUID,
-    avatar_update: AvatarUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Update a user's profile picture by selecting one of the predefined avatars
-    """
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if not db_user:
-        logger.warning(f"404 - User with ID {user_id} not found")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    
-    if not current_user.is_admin and current_user.id != user_id:
-        logger.warning(f"403 - User {current_user.id} attempted to update profile picture of user {user_id}")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions to update this user's profile picture"
-        )
-    
-    try:
-        avatar_paths = {
-            AvatarType.AVATAR_1: "/static/uploads/avatars/avatar1.png",
-            AvatarType.AVATAR_2: "/static/uploads/avatars/avatar2.png"
-        }
-        avatar_path = avatar_paths.get(avatar_update.avatar_type)
-        if not avatar_path:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid avatar type provided"
-            )
 
-        db_user.profile_picture_url = avatar_path
-        db_user.updated_at = datetime.now()
-        db.commit()
-        db.refresh(db_user)
-        
-        logger.info(f"User {current_user.id} updated profile picture for user with ID: {user_id}")
-        return db_user
-        
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Unexpected error updating profile picture: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )

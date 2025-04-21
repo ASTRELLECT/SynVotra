@@ -1,7 +1,7 @@
-from pydantic import BaseModel
-from typing import Optional, List
-from datetime import datetime
 import uuid
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import datetime
 from enum import Enum
 
 class TestimonialStatus(str, Enum):
@@ -17,10 +17,8 @@ class TestimonialCreate(TestimonialBase):
 
 class TestimonialUpdate(BaseModel):
     content: Optional[str] = None
-
-class TestimonialAdminUpdate(BaseModel):
-    status: TestimonialStatus
-    admin_comments: Optional[str] = None
+    status: Optional[TestimonialStatus] = None
+    admin_comments: Optional[str] = None 
 
 class TestimonialResponse(TestimonialBase):
     id: uuid.UUID
@@ -33,7 +31,5 @@ class TestimonialResponse(TestimonialBase):
     class Config:
         from_attributes = True
 
-class TestimonialFilter(BaseModel):
-    employee_name: Optional[str] = None
-    department: Optional[str] = None
-    status: Optional[TestimonialStatus] = None
+class TestimonialListResponse(BaseModel):
+    testimonials: List[TestimonialResponse]

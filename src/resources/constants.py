@@ -8,12 +8,15 @@ ASTRELLECT_API_VERSION = f"/astrellect/{API_VERSION_CONTROLLER}"
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
 SORS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_DIR = os.path.join(SORS_DIR, "static")
 TEMPLATES_DIR = os.path.join(SORS_DIR, "templates")
 DATABASE_DIR = os.path.join(PROJECT_ROOT, "database")
 UPLOADS_DIR = os.path.join(STATIC_DIR, "uploads")
-AVATARS_DIR = os.path.join(UPLOADS_DIR, "avatars")
+AVATARS_DIR = os.path.join(UPLOADS_DIR  , "avatars")
+AVATARS_1 = os.path.join(AVATARS_DIR, "avatar1.png")
+AVATARS_2 = os.path.join(AVATARS_DIR, "avatar2.png")
 
 if not os.path.exists(STATIC_DIR):
     os.makedirs(STATIC_DIR)

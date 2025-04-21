@@ -1,9 +1,10 @@
-from pydantic import BaseModel, root_validator, Field, EmailStr
+from pydantic import BaseModel, validator
 from typing import Optional, List
 from datetime import datetime
 from src.database.models import UserRole
-import uuid
 from enum import Enum
+import uuid
+from src.resources.constants import AVATARS_1, AVATARS_2
 
 class UserResponse(BaseModel):
     id: uuid.UUID
@@ -13,13 +14,20 @@ class UserResponse(BaseModel):
     role: Optional[UserRole] = None
     is_admin: bool = False
     is_active: bool = True
+    profile_picture_url: Optional[str] = None
+    contact_number: Optional[str] = None
+    dob: Optional[datetime] = None
+    address: Optional[str] = None
     last_login: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
-        
+
+class UserListResponse(BaseModel):
+    result : List[UserResponse]
+    
 class UserCreate(BaseModel):
     email: str
     password: str
@@ -62,9 +70,19 @@ class UserAttribute(BaseModel):
     is_active: Optional[bool] = None
     is_admin: Optional[bool] = None
 
-class AvatarType(str, Enum):
+
+class AvatarType(Enum):
     AVATAR_1 = "avatar1"
     AVATAR_2 = "avatar2"
+
+    @validator("avatar_type")
+    def validate_avatar_type(cls, v):
+        if v not in [AvatarType.AVATAR_1, AvatarType.AVATAR_2]:
+            raise ValueError("Invalid avatar type")
+        if v == "avatar1":
+            return AVATARS_1
+        elif v == "avatar2":
+            return AVATARS_2
 
 class AvatarUpdate(BaseModel):
     avatar_type: AvatarType
