@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 import uuid
+import uvicorn
 
 from src.routes import ACTIVE_ROUTES
 from src.resources.constants import ASTRELLECT_API_VERSION
@@ -34,9 +35,22 @@ def init_admin_user():
             )
             db.add(new_user)
             db.commit()
+
             logger.info("✅ Admin user created")
+            new_employee = User(
+                id=uuid.uuid4(),
+                first_name="employee",
+                email="employee@astrellect.com",
+                hashed_password=get_password_hash("employee@123#"),
+                role=UserRole.EMPLOYEE,
+                is_admin=False,
+            )
+            db.add(new_employee)
+            db.commit()
+            logger.info("✅ Employee user created")
         else:
             logger.info("✅ Admin user already exists")
+            logger.info("✅ Employee user already exists")
     except Exception as e:
         logger.error(f"Error creating admin user: {e}")
     finally:
@@ -87,5 +101,4 @@ def _get_app():
 
 if __name__ == "__main__":
     app = _get_app()
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
