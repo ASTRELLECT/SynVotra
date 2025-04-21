@@ -2,7 +2,7 @@ from typing import List
 import uuid
 import logging
 from fastapi import APIRouter, HTTPException, Depends, status
-from src.pydantic_model.users import UserCreate, UserUpdate, UserResponse, UserAttribute
+from src.pydantic_model.users import UserCreate, UserUpdate, UserResponse, UserAttribute, AvatarType, AvatarUpdate
 from src.database.models import User, UserRole
 from src.utils.utils import get_password_hash
 from sqlalchemy.orm import Session
@@ -109,7 +109,7 @@ async def filter_users_by_attributes(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred"
         )
-        
+
 @users_router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: uuid.UUID,
@@ -310,6 +310,56 @@ async def delete_user(
     except Exception as e:
         db.rollback()
         logger.error(f"Unexpected error deleting user: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred"
+        )
+
+@users_router.put("/update_profile_picture/{user_id}", response_model=UserResponse)
+async def update_profile_picture(
+    user_id: uuid.UUID,
+    avatar_update: AvatarUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Update a user's profile picture by selecting one of the predefined avatars
+    """
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        logger.warning(f"404 - User with ID {user_id} not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    if not current_user.is_admin and current_user.id != user_id:
+        logger.warning(f"403 - User {current_user.id} attempted to update profile picture of user {user_id}")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions to update this user's profile picture"
+        )
+    
+    try:
+        avatar_paths = {
+            AvatarType.AVATAR_1: "/static/uploads/avatars/avatar1.png",
+            AvatarType.AVATAR_2: "/static/uploads/avatars/avatar2.png"
+        }
+        avatar_path = avatar_paths.get(avatar_update.avatar_type)
+        if not avatar_path:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid avatar type provided"
+            )
+
+        db_user.profile_picture_url = avatar_path
+        db_user.updated_at = datetime.now()
+        db.commit()
+        db.refresh(db_user)
+        
+        logger.info(f"User {current_user.id} updated profile picture for user with ID: {user_id}")
+        return db_user
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unexpected error updating profile picture: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred"

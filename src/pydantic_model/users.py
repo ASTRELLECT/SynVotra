@@ -3,6 +3,7 @@ from typing import Optional, List
 from datetime import datetime
 from src.database.models import UserRole
 import uuid
+from enum import Enum
 
 class UserResponse(BaseModel):
     id: uuid.UUID
@@ -60,3 +61,10 @@ class UserAttribute(BaseModel):
     joining_date: Optional[datetime] = None
     is_active: Optional[bool] = None
     is_admin: Optional[bool] = None
+
+class AvatarType(str, Enum):
+    AVATAR_1 = "avatar1"
+    AVATAR_2 = "avatar2"
+
+class AvatarUpdate(BaseModel):
+    avatar_type: AvatarType
