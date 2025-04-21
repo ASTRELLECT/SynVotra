@@ -1,24 +1,26 @@
-from typing import List
 import uuid
 import logging
-from fastapi import APIRouter, HTTPException, Depends, Response, status
-from src.pydantic_model.companyPolicy import CompanyPolicyCreate, CompanyPolicyUpdate, AllCompanyPolicy
-from src.database.models import CompanyPolicy, UserRole, User
-from src.utils.utils import get_password_hash
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from datetime import datetime
+from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, Depends, Response, status
+
+from src.pydantic_model.companyPolicy import (
+    CompanyPolicyCreate, 
+    CompanyPolicyUpdate, 
+    AllCompanyPolicyResponseList
+)
 from src.database import get_db
+from src.database.models import CompanyPolicy, User
 from src.auth.auth import get_current_user, get_admin_user
 
 logger = logging.getLogger(__name__)
 
 policy_router = APIRouter(
     prefix="/policy",
-    tags=["company policy"],
+    tags=["Company policy"],
 )
 
-@policy_router.get("/getall", response_model=List[AllCompanyPolicy])
+@policy_router.get("/getall", response_model=AllCompanyPolicyResponseList)
 async def get_all_policy(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -30,8 +32,13 @@ async def get_all_policy(
     """
     try:
         policy = db.query(CompanyPolicy).all()
-        logger.info(f"Found {len(policy)} policies.")
-        return policy
+        if not policy:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No company policies found"
+            )
+        logger.info("Company policies retrieved successfully")
+        return AllCompanyPolicyResponseList(company_policies=policy)
     except Exception as e:
         logger.error(f"Unexpected error retrieving users: {str(e)}")
         raise HTTPException(
@@ -39,7 +46,7 @@ async def get_all_policy(
             detail="An unexpected error occurred"
         )
 
-@policy_router.post("/create_new_policy", response_model=CompanyPolicyCreate, status_code=status.HTTP_201_CREATED)
+@policy_router.post("/create_new_policy",status_code=status.HTTP_201_CREATED)
 async def create_policy(
     policy: CompanyPolicyCreate,
     db: Session = Depends(get_db),
@@ -51,9 +58,7 @@ async def create_policy(
     Requires: Valid JWT token
     """
     try:
-        # Case-insensitive title check
         existing_policy = db.query(CompanyPolicy).filter(CompanyPolicy.title == policy.title).first()
-        
         if existing_policy:
             logger.warning(f"Policy title conflict: {policy.title}")
             raise HTTPException(
@@ -61,7 +66,6 @@ async def create_policy(
                 detail="Policy with this title already exists"
             )
 
-        # Create new policy - only include valid fields
         policy_data = policy.model_dump()
         new_policy = CompanyPolicy(
             **policy_data,
@@ -74,8 +78,8 @@ async def create_policy(
         db.add(new_policy)
         db.commit()
         db.refresh(new_policy)
-        logger.info(f"Admin {current_user.id} created new Company Policy with title: {new_policy.title}")
-        return new_policy
+        logger.info("✅ Company policy created successfully")
+        return {"message": "Company policy created successfully", "id": new_policy.id}
 
     except Exception as e:
         db.rollback()
@@ -85,7 +89,7 @@ async def create_policy(
             detail="Failed to create policy"
         )
 
-@policy_router.put("/edit_policy/{policy_id}", response_model=CompanyPolicyUpdate)
+@policy_router.put("/edit_policy/{policy_id}")
 async def update_policy(
     policy_id: uuid.UUID,
     policy_update: CompanyPolicyUpdate,
@@ -100,7 +104,6 @@ async def update_policy(
     - Admin privileges
     """
     try:
-        # Get existing policy
         db_policy = db.query(CompanyPolicy).filter(CompanyPolicy.id == policy_id).first()
         if not db_policy:
             raise HTTPException(
@@ -119,20 +122,15 @@ async def update_policy(
                     detail="Policy with this title already exists"
                 )
 
-        # Update fields
         update_data = policy_update.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_policy, field, value)
         
         db_policy.updated_at = datetime.utcnow()
-        logger.info(f"Admin {current_user.id} updated the Company Policy '{db_policy.title}'")
         db.commit()
         db.refresh(db_policy)
-        logger.info(f"Admin {current_user.id} updated the Company Policy '{db_policy}'")
-        return db_policy
-
-    except HTTPException:
-        raise
+        logger.info("✅ Company policy updated successfully")
+        return {"message": "Company policy updated successfully"}
     except Exception as e:
         db.rollback()
         logger.error(f"Error updating policy: {str(e)}", exc_info=True)
@@ -162,13 +160,10 @@ async def delete_policy(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Policy not found"
             )
-        logger.info(f"Admin {current_user.id} created new Company Policy with title: {db_policy.title}")
         db.delete(db_policy)
         db.commit()
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-    except HTTPException:
-        raise
+        logger.info("✅ Company policy deleted successfully")
+        return {"message": "Company policy deleted successfully"}
     except Exception as e:
         db.rollback()
         logger.error(f"Error deleting policy: {str(e)}", exc_info=True)

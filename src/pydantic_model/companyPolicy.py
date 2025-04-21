@@ -1,8 +1,6 @@
-from pydantic import BaseModel, root_validator, Field, EmailStr
-from typing import Optional, List
-from datetime import datetime
-from src.database.models import CompanyPolicy
 import uuid
+from typing import Optional, List
+from pydantic import BaseModel
 
 
 class AllCompanyPolicy(BaseModel):
@@ -17,7 +15,8 @@ class AllCompanyPolicy(BaseModel):
     class Config:
         from_attributes = True
 
-
+class AllCompanyPolicyResponseList(BaseModel):
+    company_policies: List[AllCompanyPolicy]
 
 class CompanyPolicyCreate(BaseModel):
     title: str
