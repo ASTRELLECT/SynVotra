@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -71,8 +71,9 @@ def _get_app():
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-    templates = Jinja2Templates(directory=TEMPLATES_DIR)
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    templates = Jinja2Templates(directory="templates")
+    print(STATIC_DIR, TEMPLATES_DIR)
     async def startup_event():
         try:
             models.Base.metadata.create_all(bind=engine)
@@ -96,6 +97,10 @@ def _get_app():
             logger.error(f"Error during startup: {e}")
     for route in ACTIVE_ROUTES.values():
         app.include_router(route, prefix=ASTRELLECT_API_VERSION)
+
+    @app.get("/")
+    async def root(request: Request):
+        return templates.TemplateResponse("index.html", {"request": request})
 
     return app
 
