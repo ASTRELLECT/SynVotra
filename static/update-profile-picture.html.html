@@ -1,0 +1,73 @@
+<!-- Profile Picture Upload UI -->
+<div class="profile-pic-container">
+  <label for="profile-upload" class="profile-pic-label">
+    <img src="https://via.placeholder.com/100" id="preview-pic" alt="Profile" />
+    <div class="camera-icon">&#128247;</div>
+    <input type="file" id="profile-upload" accept="image/*" onchange="previewImage()" />
+  </label>
+  <button onclick="uploadPic()">Upload</button>
+  <div id="toast">Profile picture updated successfully!</div>
+</div>
+
+<style>
+  .profile-pic-container {
+    text-align: center;
+    margin: 40px auto;
+  }
+
+  .profile-pic-label {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+
+  .profile-pic-label img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+  }
+
+  .camera-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #333;
+    color: white;
+    padding: 5px;
+    border-radius: 50%;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  #toast {
+    display: none;
+    background-color: #4BB543;
+    color: white;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+  }
+</style>
+
+<script>
+  function previewImage() {
+    const input = document.getElementById('profile-upload');
+    const preview = document.getElementById('preview-pic');
+    const file = input.files[0];
+
+    if (file) {
+      preview.src = URL.createObjectURL(file);
+    }
+  }
+
+  function uploadPic() {
+    // Mocking upload
+    document.getElementById('toast').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('toast').style.display = 'none';
+    }, 3000);
+  }
+</script>
