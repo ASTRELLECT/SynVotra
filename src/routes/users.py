@@ -139,13 +139,6 @@ async def get_user(
     Requires: Valid JWT token. Regular users can only get their own record.
     """
     try:
-        if not current_user.is_admin and str(current_user.id) != str(user_id):
-            logger.warning(f"403 - User {current_user.id} attempted to access user {user_id}")
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not enough permissions to access this record"
-            )
-        
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             logger.warning(f"404 - User with ID {user_id} not found")
