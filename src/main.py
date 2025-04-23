@@ -103,6 +103,9 @@ def _get_app():
     async def root(request: Request):
         return templates.TemplateResponse("index.html", {"request": request})
     
+    @app.get("/policy")
+    async def companyPolicy(request: Request):
+        return templates.TemplateResponse("policy-documentation/policy.html", {"request": request})
     @app.get("/admin-view")
     async def adminView(request: Request):
         return templates.TemplateResponse("admin/admin-view.html", {"request": request})
