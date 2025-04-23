@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/employee-profile/styles_v1_0_0.css" rel="stylesheet">
+    <title>Employee Profile Dashboard</title>
+   
+</head>
+<body>
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-header-left">
+                    <div class="profile-photo-container">
+                        <img src="/api/placeholder/120/120" alt="Employee Profile Photo" class="profile-photo">
+                        <div class="camera-icon" onclick="showPhotoModal()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.83A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
+                                <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="name-title">
+                        <div class="employee-name">FULL NAME</div>
+                        <div class="employee-designation">JOB TITLE</div>
+                    </div>
+                </div>
+                <button class="edit-profile-btn">Edit Profile</button>
+            </div>
+            
+            <div class="profile-info">
+                <div class="info-row">
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value">Aiswarya Radhakrishnan</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Designation / Job Title</div>
+                    <div class="info-value">Senior Software Engineer</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Contact Number</div>
+                    <div class="info-value contact-edit-container">
+                        <span id="contactNumber">+353 0000000000</span>
+                        <div class="edit-icon" onclick="showContactModal()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Date of Birth</div>
+                    <div class="info-value">15 January 1990</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Address</div>
+                    <div class="info-value">123 XYZ Street, Apt 01, Dublin</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Employee Email ID</div>
+                    <div class="info-value">xyz@company.com</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Joining Date</div>
+                    <div class="info-value">10 June 2020</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Reporting Manager</div>
+                    <div class="info-value">John</div>
+                </div>
+            </div>
+            
+            <div class="password-section">
+                <a href="#" class="password-link" onclick="togglePasswordForm(); return false;">Change password</a>
+                
+                <div id="passwordForm" class="password-form">
+                    <div class="form-group">
+                        <label for="currentPassword" class="form-label">Current password</label>
+                        <input type="password" id="currentPassword" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPassword" class="form-label">New password</label>
+                        <input type="password" id="newPassword" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Confirm password</label>
+                        <input type="password" id="confirmPassword" class="form-control">
+                    </div>
+                    
+                    <div class="password-actions">
+                        <button class="btn btn-secondary" onclick="togglePasswordForm()">Cancel</button>
+                        <button class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact Update Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Update Contact Number</h2>
+                <span class="close-btn" onclick="closeContactModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newContactNumber" class="form-label">New Contact Number</label>
+                    <input type="tel" id="newContactNumber" class="form-control" value="+1 (555) 123-4567">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeContactModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="updateContactNumber()">Update</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Photo Update Modal -->
+    <div id="photoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Update Profile Picture</h2>
+                <span class="close-btn" onclick="closePhotoModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newPhoto" class="form-label">Choose a new photo</label>
+                    <input type="file" id="newPhoto" class="form-control" accept="image/*">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePhotoModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="updateProfilePhoto()">Upload</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Function to open and close edit contact number modal
+        function showContactModal() {
+            document.getElementById('contactModal').style.display = 'block';
+        }
+        
+        function closeContactModal() {
+            document.getElementById('contactModal').style.display = 'none';
+        }
+        
+        function updateContactNumber() {
+            const newNumber = document.getElementById('newContactNumber').value;
+            document.getElementById('contactNumber').textContent = newNumber;
+            closeContactModal();
+        }
+        
+        // Function to open and close upload photo modal
+        function showPhotoModal() {
+            document.getElementById('photoModal').style.display = 'block';
+        }
+        
+        function closePhotoModal() {
+            document.getElementById('photoModal').style.display = 'none';
+        }
+        
+        function updateProfilePhoto() {
+            const fileInput = document.getElementById('newPhoto');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('.profile-photo').src = e.target.result;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+            closePhotoModal();
+        }
+        
+        // Display password form on toggle
+        function togglePasswordForm() {
+            const passwordForm = document.getElementById('passwordForm');
+            passwordForm.style.display = passwordForm.style.display === 'none' || !passwordForm.style.display ? 'flex' : 'none';
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const contactModal = document.getElementById('contactModal');
+            const photoModal = document.getElementById('photoModal');
+            if (event.target == contactModal) {
+                contactModal.style.display = 'none';
+            }
+            if (event.target == photoModal) {
+                photoModal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
