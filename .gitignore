@@ -8,3 +8,5 @@ __pycache__/
 # Virtual environment folder
 venv/
 .env/
+
+database/astrellect.db
