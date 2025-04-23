@@ -1,13 +1,14 @@
 import uuid
 import logging
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 
 from src.database.models import Announcement, AnnouncementRecipient
 from src.pydantic_model.announcement import (
-    AnnouncementAttribute, 
+    AnnouncementAttribute,
     AnnouncementCreate,
     AnnouncementListResponse,
     AnnouncementRecipientResponse
@@ -35,13 +36,13 @@ async def get_all_announcements(
     """
     try:
         announcements = db.query(Announcement).all()
-        logger.info("Announcements retrieved successfully")
+        logger.info("✅ Announcements retrieved successfully")
         return AnnouncementListResponse(announcements=announcements)
     except Exception as e:
-        logger.error(f"Unexpected error retrieving users: {str(e)}")
-        raise HTTPException(
+        logger.error(f"❌ Unexpected error retrieving announcements: {str(e)}")
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            content={"detail": "An unexpected error occurred while getting all announcements."}
         )
 
 
@@ -50,7 +51,6 @@ async def filter_announcement_by_attribute(
     attributes: AnnouncementAttribute = Depends(),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
-    
     """
     Get announcements filtered by any combination of attributes.
     Requires: Valid JWT token. All authenticated users can access.
@@ -72,27 +72,28 @@ async def filter_announcement_by_attribute(
         if attributes.end_date:
             filters.append(Announcement.end_date <= attributes.end_date)
 
-        logger.info("Announcements filtered successfully")
+        logger.info("✅ Announcements filtered successfully")
         if filters:
             query = query.filter(*filters)
         announcements = query.all()
         if not announcements:
-            raise HTTPException(
+            logger.warning("⚠️ No announcements found matching criteria")
+            return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No announcements found matching the provided criteria"
+                content={"detail": "No announcements found matching the provided criteria."}
             )
 
+        logger.info("✅ Announcements filtered successfully")
         return AnnouncementListResponse(announcements=announcements)
     except Exception as e:
-        logger.error(f"Unexpected error filtering announcements: {str(e)}")
-        raise HTTPException(
+        logger.error(f"❌ Unexpected error filtering announcements: {str(e)}")
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            content={"detail": "An unexpected error occurred while filtering."}
         )
 
-@announcement_router.get("/get-recipient/{announcement_id}",
-                          response_model=AnnouncementRecipientResponse
-)
+
+@announcement_router.get("/get-recipient/{announcement_id}", response_model=AnnouncementRecipientResponse)
 async def get_announcement_recipient(
     announcement_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -101,7 +102,7 @@ async def get_announcement_recipient(
     
     """
     Get the announcement recipient according to the user id and 
-    announcement id 
+    announcement id.
     """
     try:
         user_id = current_user.id
@@ -111,16 +112,18 @@ async def get_announcement_recipient(
         ).first()
 
         if not recipient:
-            raise HTTPException(
+            logger.warning("⚠️ Recipient not found for given user and announcement")
+            return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Recipient not found for given user and announcement"
+                content={"detail": "Recipient not found for given user and announcement"}
             )
+        logger.info("✅ Announcement recipient retrieved successfully")
         return recipient
     except Exception as e:
-        logger.error(f"Error retrieving recipient: {str(e)}")
-        raise HTTPException(
+        logger.error(f"❌ Error retrieving recipient: {str(e)}")
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred while retrieving the recipient"
+            content={"detail": "An unexpected error occurred while retrieving the recipient"}
         )
 
 @announcement_router.post("/create")
@@ -129,24 +132,23 @@ async def create_Announcement(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    
     """
     Create a new announcement.
     Automatically assigns all active employees as recipients.
-    Allowed: Admins and Managers only.
+    Allowed: Admins only.
     """
     try:
-        if not current_user.is_admin :
-            logger.warning(f"403 - User {current_user.id} attempted to filter users by attributes")
-            raise HTTPException(
+        if not current_user.is_admin:
+            logger.warning(f"🚫 403 - User {current_user.id} attempted unauthorized announcement creation")
+            return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not enough permissions to create an announcement"
+                content={"detail": "No enough permission to create an announcement."}
             )
     except Exception as e:
-        logger.error(f"Unexpected error checking user permissions: {str(e)}")
-        raise HTTPException(
+        logger.error(f"❌ Unexpected error checking user permissions: {str(e)}")
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            content={"detail": "An unexpected error occurred while creating announcement (no enough permission)."}
         )
     try:
         new_announcement = Announcement(
@@ -162,7 +164,8 @@ async def create_Announcement(
         )
 
         db.add(new_announcement)
-        db.flush()  
+        db.flush()
+
         employees = db.query(User).filter(User.role == UserRole.EMPLOYEE, User.is_active == True).all()
 
         for employee in employees:
@@ -176,22 +179,24 @@ async def create_Announcement(
             db.add(recipient)
         db.commit()
         db.refresh(new_announcement)
-        logger.info("✅ Announcement created successfully")
-        return new_announcement
-    
+        logger.info("✅ Announcement created successfully.")
+        return JSONResponse(
+            status_code=status.HTTP_201_CREATED,
+            content={"detail": "Announcement created successfully.", "announcement_id": str(new_announcement.id)}
+        )
     except IntegrityError as e:
         db.rollback()
-        logger.error(f"Database integrity error: {str(e)}")
-        raise HTTPException(
+        logger.error(f"❌ Database integrity error: {str(e)}")
+        return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Could not create announcement due to database constraint"
+            content={"detail": "Could not create announcement due to database constraint."}
         )
     except Exception as e:
         db.rollback()
-        logger.error(f"Unexpected error creating announcement: {str(e)}")
-        raise HTTPException(
+        logger.error(f"❌ Unexpected error creating announcement: {str(e)}")
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            content={"detail": "An unexpected error occurred while creating announcement."}
         )
 
 
@@ -211,29 +216,35 @@ async def mark_announcement_as_read(
         ).first()
 
         if not recipient:
-            raise HTTPException(
+            logger.warning("⚠️ No announcement corresponding to this user.")
+            return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No announcement corresponding to this user"
+                content={"detail": "No announcement corresponding to this user."}
             )
 
         if recipient.is_read:
-            return {"message": "Already marked as read"}
+            logger.info("ℹ️ Already marked as read")
+            return JSONResponse(
+                status_code=status.HTTP_304_NOT_MODIFIED,
+                content={"detail": "Already marked as read."}
+            )
 
         recipient.is_read = True
         recipient.read_at = datetime.now()
 
         db.commit()
         db.refresh(recipient)
-
-        logger.info("✅ Announcement marked as read successfully")  
-        return {"message": "Announcement marked as read successfully"}
-
+        logger.info("✅ Announcement marked as read successfully.")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"detail": "Announcement marked as read successfully."}
+        )
     except Exception as e:
         db.rollback()
-        logger.error(f"Error marking announcement as read: {str(e)}")
-        raise HTTPException(
+        logger.error(f"❌ Error marking announcement as read: {str(e)}")
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            content={"detail": "An unexpected error occurred while marking announcement as read."}
         )
 
 @announcement_router.delete("/delete/{announcement_id}")
@@ -241,47 +252,48 @@ async def delete_announcement(
     announcement_id: uuid.UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
-    
     """
     Delete an announcement and all its recipient entries.
-    Allowed: Admins and Managers only.
+    Allowed: Admins only.
     """
     try:
-        if not current_user.is_admin :
-            logger.warning(f"403 - User {current_user.id} attempted to filter users by attributes")
-            raise HTTPException(
+        if not current_user.is_admin:
+            logger.warning(f"🚫 403 - User {current_user.id} attempted unauthorized delete operation")
+            return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not enough permissions to create an announcement"
+                content={"detail": "Not enough permissions to delete an announcement."}
             )
     except Exception as e:
-        logger.error(f"Unexpected error checking user permissions: {str(e)}")
-        raise HTTPException(
+        logger.error(f"❌ Unexpected error checking user permissions: {str(e)}")
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            content={"detail": "An unexpected error occurred while deleting announcement (no enough permission)."}
         )
     try:
         announcement = db.query(Announcement).filter(Announcement.id == announcement_id).first()
-        
+
         if not announcement:
-            raise HTTPException(
+            logger.warning("⚠️ Announcement not found.")
+            return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Announcement not found"
+                content={"detail": "Announcement not found."}
             )
-        
+
         db.query(AnnouncementRecipient).filter(
             AnnouncementRecipient.announcement_id == announcement_id
         ).delete()
         db.delete(announcement)
         db.commit()
 
-        logger.info("✅ Announcement deleted successfully")
-        return {"message": "Announcement and associated recipients deleted successfully"}
-
+        logger.info("✅ Announcement and associated recipients deleted successfully.")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"detail": "Announcement and associated recipients deleted successfully."}
+        )
     except Exception as e:
         db.rollback()
-        logger.error(f"Error deleting announcement: {str(e)}")
-        raise HTTPException(
+        logger.error(f"❌ Error deleting announcement: {str(e)}")
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred while deleting the announcement"
+            content={"detail": "An unexpected error occurred while deleting the announcement."}
         )
-        
