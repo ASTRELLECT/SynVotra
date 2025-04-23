@@ -6,18 +6,21 @@ from enum import Enum
 import uuid
 from src.resources.constants import AVATARS_1, AVATARS_2
 
+    
 class UserResponse(BaseModel):
     id: uuid.UUID
     email: str
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     role: Optional[UserRole] = None
-    is_admin: bool = False
-    is_active: bool = True
-    profile_picture_url: Optional[str] = None
     contact_number: Optional[str] = None
     dob: Optional[datetime] = None
     address: Optional[str] = None
+    profile_picture_url: Optional[str] = None
+    joining_date: Optional[datetime] = None
+    reporting_manager_id: Optional[uuid.UUID] = None
+    is_active: bool = True
+    is_admin: bool = False
     last_login: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
