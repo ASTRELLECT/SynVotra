@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/company-policy/styles_v1_0_0.css" rel="stylesheet">
+    <title>Company Policy</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>Company Policy</h1>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="search-container">
+            <div class="search-form">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search policies by title, keyword, or content..." onkeyup="searchPolicies()">
+                <button class="search-btn" onclick="searchPolicies()">
+                    Search
+                </button>
+            </div>
+        </div>
+
+        <div class="category-tabs">
+            <div class="category-tab active" onclick="filterByCategory('all')">All Policies</div>
+            <div class="category-tab" onclick="filterByCategory('hr')">HR Policies</div>
+            <div class="category-tab" onclick="filterByCategory('it')">IT Policies</div>
+            <div class="category-tab" onclick="filterByCategory('safety')">Safety Guidelines</div>
+        </div>
+
+        <div class="spinner" id="loadingSpinner"></div>
+
+        <div class="policies-container" id="policiesContainer">
+            <!-- Policies will be loaded here dynamically -->
+        </div>
+    </div>
+
+    <!-- Policy View Modal -->
+    <div id="policyModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modalTitle">Policy Title</h2>
+                <div class="modal-header-info">
+                    <span id="modalCategory" class="policy-category">Category</span>
+                    <span id="modalVersion" class="policy-version">Version</span>
+                    <span id="modalStatus" class="policy-status">
+                        <span class="status-indicator"></span> Status
+                    </span>
+                </div>
+            </div>
+            <div id="modalBody">
+                <!-- Policy content will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="downloadLink" class="download-btn" target="_blank">
+                    <svg class="download-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                    </svg>
+                    Download PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:8000';
+        // Function to fetch user data when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPolicies();
+        });
+        async function fetchPolicies() {
+    try {
+        showLoading(true);
+        
+        const token = localStorage.getItem('astrellect_token');
+        
+        if (!token) {
+            console.error('No authentication token found');
+            showErrorMessage('Please log in to view your profile');
+            return [];  // Return empty array instead of undefined
+        }
+        
+        const response = await fetch('/astrellect/v1/policy/getall', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch policy data');
+        }
+        
+        const data = await response.json();
+        
+        // Extract the company_policies array from the response
+        return data.company_policies || [];
+    } catch (error) {
+        console.error('Error fetching policies:', error);
+        return [];
+    } finally {
+        showLoading(false);
+    }
+}
+        // Show or hide loading spinner
+        function showLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+        }
+        
+        // Load and display policies
+        async function loadPolicies() {
+            const policies = await fetchPolicies();
+            displayPolicies(policies);
+        }
+        
+        // Variables to track current state
+        let currentPolicies = [];
+        let currentCategory = 'all';
+        let currentSearchTerm = '';
+        
+        // Function to display policies
+        function displayPolicies(policies) {
+            currentPolicies = policies;
+            const container = document.getElementById('policiesContainer');
+            container.innerHTML = '';
+            
+            // Filter policies based on current category and search term
+            const filteredPolicies = policies.filter(policy => {
+                const matchesCategory = currentCategory === 'all' || policy.category === currentCategory;
+                const matchesSearch = currentSearchTerm === '' || 
+                    policy.title.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
+                    policy.description.toLowerCase().includes(currentSearchTerm.toLowerCase());
+                
+                return matchesCategory && matchesSearch;
+            });
+            
+            // Display policies or "no results" message
+            if (filteredPolicies.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <h3>No policies found</h3>
+                        <p>Try adjusting your search or filter criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Create policy cards
+            filteredPolicies.forEach(policy => {
+                const card = document.createElement('div');
+                card.className = 'policy-card';
+                
+                // Status indicator based on is_active flag
+                const statusIndicator = policy.is_active ? 
+                    '<span class="status-indicator status-active"></span> Active' : 
+                    '<span class="status-indicator status-inactive"></span> Inactive';
+                
+                card.innerHTML = `
+                    <div class="policy-header">
+                        <h3>${policy.title}</h3>
+                    </div>
+                    <div class="policy-body">
+                        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 5px;">
+                            <span class="policy-category">${getCategoryName(policy.category)}</span>
+                            <span class="policy-version">v${policy.version}</span>
+                        </div>
+                        <p>${policy.description}</p>
+                        <p class="policy-status">${statusIndicator}</p>
+                    </div>
+                    <div class="policy-footer">
+                        <button class="view-btn" onclick="viewPolicy('${policy.id}')">View Details</button>
+                        <a href="${policy.document_url}" class="download-btn" target="_blank">
+                            <svg class="download-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                            </svg>
+                            PDF
+                        </a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        // Function to get human-readable category name
+        function getCategoryName(categoryCode) {
+            const categories = {
+                'hr': 'HR Policy',
+                'it': 'IT Policy',
+                'safety': 'Safety Guideline'
+            };
+            
+            return categories[categoryCode] || categoryCode;
+        }
+        
+        // Filter policies by category
+        function filterByCategory(category) {
+            currentCategory = category;
+            
+            // Update active tab styling
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            event.currentTarget.classList.add('active');
+            
+            // Re-display policies with new filter
+            displayPolicies(currentPolicies);
+        }
+        
+        // Search policies
+        function searchPolicies() {
+            currentSearchTerm = document.getElementById('searchInput').value.trim();
+            displayPolicies(currentPolicies);
+        }
+        
+        // View policy details
+        function viewPolicy(policyId) {
+            const policy = currentPolicies.find(p => p.id === policyId);
+            if (!policy) return;
+            
+            // Set modal content
+            document.getElementById('modalTitle').textContent = policy.title;
+            document.getElementById('modalCategory').textContent = getCategoryName(policy.category);
+            document.getElementById('modalVersion').textContent = `v${policy.version}`;
+            
+            // Set status indicator
+            const statusIndicator = document.querySelector('#modalStatus .status-indicator');
+            if (policy.is_active) {
+                statusIndicator.className = 'status-indicator status-active';
+                document.getElementById('modalStatus').innerHTML = `
+                    <span class="status-indicator status-active"></span> Active
+                `;
+            } else {
+                statusIndicator.className = 'status-indicator status-inactive';
+                document.getElementById('modalStatus').innerHTML = `
+                    <span class="status-indicator status-inactive"></span> Inactive
+                `;
+            }
+            
+            // Set modal body content (would typically be fetched from the API)
+            document.getElementById('modalBody').innerHTML = `
+                <p>${policy.description}</p>
+                <p>To view the complete policy, please download the PDF document.</p>
+            `;
+            
+            // Set download link
+            document.getElementById('downloadLink').href = policy.document_url;
+            
+            // Show modal
+            document.getElementById('policyModal').style.display = 'block';
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('policyModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('policyModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Event listener for escape key to close modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && document.getElementById('policyModal').style.display === 'block') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

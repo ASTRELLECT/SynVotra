@@ -102,6 +102,10 @@ def _get_app():
     @app.get("/")
     async def root(request: Request):
         return templates.TemplateResponse("index.html", {"request": request})
+    
+    @app.get("/policy")
+    async def root(request: Request):
+        return templates.TemplateResponse("policy-documentation/policy.html", {"request": request})
 
     @app.get("/employee-dashboard",response_class=HTMLResponse)
     async def root(request:Request):
