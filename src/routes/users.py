@@ -27,6 +27,16 @@ users_router = APIRouter(
     tags=["Employees"]
 )
 
+@users_router.get("/get-me", response_model=UserResponse)
+async def get_current_user_info(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get the currently logged-in user's information
+    
+    Requires: Valid JWT token
+    """
+    return current_user
 
 @users_router.get("/getall", response_model=UserListResponse)
 async def get_all_users(
