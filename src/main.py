@@ -14,6 +14,7 @@ from src.database import models, engine, Base, SessionLocal
 from src.database.models import User, UserRole
 from src.resources.constants import  STATIC_DIR, TEMPLATES_DIR
 from src.utils.utils import get_password_hash
+from fastapi.responses import HTMLResponse
 
 
 logging.basicConfig(level=logging.INFO)
@@ -102,6 +103,10 @@ def _get_app():
     async def root(request: Request):
         return templates.TemplateResponse("index.html", {"request": request})
 
+    @app.get("/employee-dashboard",response_class=HTMLResponse)
+    async def root(request:Request):
+        return templates.TemplateResponse('employee-profile/dashboard.html',{'request':request})
+ 
     return app
 
 if __name__ == "__main__":

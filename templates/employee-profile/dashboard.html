@@ -13,7 +13,7 @@
             <div class="profile-header">
                 <div class="profile-header-left">
                     <div class="profile-photo-container">
-                        <img src="/api/placeholder/120/120" alt="Employee Profile Photo" class="profile-photo">
+                        <img src="/api/placeholder/120/120" alt="Employee Profile Photo" class="profile-photo" id="profilePhotoDisplay">
                         <div class="camera-icon" onclick="showPhotoModal()">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
                                 <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.83A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
@@ -22,8 +22,8 @@
                         </div>
                     </div>
                     <div class="name-title">
-                        <div class="employee-name">FULL NAME</div>
-                        <div class="employee-designation">JOB TITLE</div>
+                        <div class="employee-name" id="headerName">Loading...</div>
+                        <div class="employee-designation" id="headerJobTitle">Loading...</div>
                     </div>
                 </div>
                 <button class="edit-profile-btn">Edit Profile</button>
@@ -32,18 +32,18 @@
             <div class="profile-info">
                 <div class="info-row">
                     <div class="info-label">Full Name</div>
-                    <div class="info-value">Aiswarya Radhakrishnan</div>
+                    <div class="info-value" id="fullName">Loading...</div>
                 </div>
                 
                 <div class="info-row">
                     <div class="info-label">Designation / Job Title</div>
-                    <div class="info-value">Senior Software Engineer</div>
+                    <div class="info-value" id="jobTitle">Loading...</div>
                 </div>
                 
                 <div class="info-row">
                     <div class="info-label">Contact Number</div>
                     <div class="info-value contact-edit-container">
-                        <span id="contactNumber">+353 0000000000</span>
+                        <span id="contactNumber">Loading...</span>
                         <div class="edit-icon" onclick="showContactModal()">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                                 <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
@@ -54,27 +54,27 @@
                 
                 <div class="info-row">
                     <div class="info-label">Date of Birth</div>
-                    <div class="info-value">15 January 1990</div>
+                    <div class="info-value" id="dob">Loading...</div>
                 </div>
                 
                 <div class="info-row">
                     <div class="info-label">Address</div>
-                    <div class="info-value">123 XYZ Street, Apt 01, Dublin</div>
+                    <div class="info-value" id="address">Loading...</div>
                 </div>
                 
                 <div class="info-row">
                     <div class="info-label">Employee Email ID</div>
-                    <div class="info-value">xyz@company.com</div>
+                    <div class="info-value" id="email">Loading...</div>
                 </div>
                 
                 <div class="info-row">
                     <div class="info-label">Joining Date</div>
-                    <div class="info-value">10 June 2020</div>
+                    <div class="info-value" id="joiningDate">Loading...</div>
                 </div>
                 
                 <div class="info-row">
                     <div class="info-label">Reporting Manager</div>
-                    <div class="info-value">John</div>
+                    <div class="info-value" id="manager">Loading...</div>
                 </div>
             </div>
             
@@ -116,7 +116,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="newContactNumber" class="form-label">New Contact Number</label>
-                    <input type="tel" id="newContactNumber" class="form-control" value="+1 (555) 123-4567">
+                    <input type="tel" id="newContactNumber" class="form-control">
                 </div>
             </div>
             <div class="modal-footer">
@@ -147,6 +147,130 @@
     </div>
     
     <script>
+        const BASE_URL = 'http://127.0.0.1:8000';
+        // Load user data from API when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            await fetchUserData();
+        });
+        
+        // Function to fetch user data from API
+        async function fetchUserData() {
+            try {
+                // Get token from localStorage (you need to set this when user logs in)
+                const token = localStorage.getItem('astrellect_token');
+                
+                if (!token) {
+                    console.error('No authentication token found');
+                    showErrorMessage('Please log in to view your profile');
+                    return;
+                }
+                
+                // Make API request to get user data
+                const response = await fetch('/astrellect/v1/employees/get-me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+                
+                const userData = await response.json();
+                console.log(userData,'userData')
+                if (userData.reporting_manager_id) {
+        // Second API call - Get reporting manager details using the ID
+        // Add the authorization header here as well
+        const managerResponse = await fetch(`/astrellect/v1/employees/${userData.reporting_manager_id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!managerResponse.ok) {
+            throw new Error('Failed to fetch manager data');
+        }
+        
+        const managerInfo = await managerResponse.json();
+        userData.reporting_manager_name = managerInfo.first_name || 'Unknown';
+    } else {
+            userData.reporting_manager_name = 'None assigned';
+        }
+                updateProfileUI(userData);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                showErrorMessage('Could not load profile data');
+            }
+        }
+        
+        // Function to update UI with user data
+        function updateProfileUI(userData) {
+            // Update header section
+            document.getElementById('headerName').textContent = userData.first_name || 'N/A';
+            document.getElementById('headerJobTitle').textContent = userData.role || 'N/A';
+            
+            // Update main profile info
+            document.getElementById('fullName').textContent = userData.first_name || 'N/A';
+            document.getElementById('jobTitle').textContent = userData.role || 'N/A';
+            document.getElementById('contactNumber').textContent = userData.contact_number || 'N/A';
+            document.getElementById('dob').textContent = formatDate(userData.dob) || 'N/A';
+            document.getElementById('address').textContent = userData.address || 'N/A';
+            document.getElementById('email').textContent = userData.email || 'N/A';
+            document.getElementById('joiningDate').textContent = formatDate(userData.joining_date) || 'N/A';
+            document.getElementById('manager').textContent = userData.reporting_manager_name || 'N/A';
+            
+            // Update photo if available
+            if (userData.profile_photo) {
+                document.getElementById('profilePhotoDisplay').src = userData.profile_photo;
+            }
+            
+            // Pre-fill the contact modal with current number
+            document.getElementById('newContactNumber').value = userData.contact_number || '';
+        }
+        
+        // Helper function to format dates
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            
+            try {
+                const date = new Date(dateString);
+                
+                if (isNaN(date.getTime())) {
+                    return dateString; // Return original if parsing fails
+                }
+                
+                const day = date.getDate();
+                const month = date.toLocaleString('default', { month: 'long' });
+                const year = date.getFullYear();
+                
+                return `${day} ${month} ${year}`;
+            } catch (error) {
+                console.error('Error formatting date:', error);
+                return dateString; // Return original on error
+            }
+        }
+        
+        // Function to display error messages
+        function showErrorMessage(message) {
+            // Update key elements to show error
+            document.getElementById('headerName').textContent = 'Error';
+            document.getElementById('headerJobTitle').textContent = message;
+            
+            // Update all values with error message
+            const infoValues = document.querySelectorAll('.info-value');
+            infoValues.forEach(el => {
+                if (!el.classList.contains('contact-edit-container')) {
+                    el.textContent = 'Error loading data';
+                }
+            });
+            
+            document.getElementById('contactNumber').textContent = 'Error loading data';
+        }
+        
         // Function to open and close edit contact number modal
         function showContactModal() {
             document.getElementById('contactModal').style.display = 'block';
@@ -158,8 +282,8 @@
         
         function updateContactNumber() {
             const newNumber = document.getElementById('newContactNumber').value;
-            document.getElementById('contactNumber').textContent = newNumber;
-            closeContactModal();
+                document.getElementById('contactNumber').textContent = newNumber;
+                closeContactModal();
         }
         
         // Function to open and close upload photo modal
@@ -171,7 +295,7 @@
             document.getElementById('photoModal').style.display = 'none';
         }
         
-        function updateProfilePhoto() {
+       function updateProfilePhoto() {
             const fileInput = document.getElementById('newPhoto');
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
