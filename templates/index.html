@@ -2,125 +2,302 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SynVotra Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astrellect API Demo</title>
+    <!-- favicon from assets -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #e0e0e0;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            flex-direction: column;
+            gap: 20px;
         }
-
-        .login-container {
-            background: white;
-            padding: 40px;
-            border: 3px solid #0a91ff;
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        .section {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
         }
-
-        .login-container h1 {
-            font-family: Georgia, serif;
-            font-weight: bold;
-            font-size: 32px;
-            margin-bottom: 30px;
-        }
-
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: none;
-            background-color: #ddd;
-            font-style: italic;
-        }
-
-        .forgot-password {
-            display: block;
-            margin-bottom: 25px;
-            font-size: 14px;
-            color: black;
-        }
-
         button {
-            background-color: #ddd;
-            color: black;
-            padding: 12px 20px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
             border: none;
-            font-weight: bold;
-            font-size: 16px;
+            border-radius: 4px;
             cursor: pointer;
-            width: 100%;
         }
-
         button:hover {
-            background-color: #ccc;
+            background-color: #45a049;
         }
-
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
         .error {
             color: red;
+        }
+        .success {
+            color: green;
+        }
+        #announcementsList {
             margin-top: 10px;
-            font-size: 14px;
+        }
+        .announcement {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Astrellect API Demo</h1>
+        
+        <!-- Login Section -->
+        <div class="section">
+            <h2>Login</h2>
+            <div id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button onclick="handleLogin()">Login</button>
+            </div>
+            <div id="loginMessage"></div>
+            <div id="loggedInSection" style="display: none;">
+                <p>Logged in successfully! Token stored.</p>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Announcements Section -->
+        <div class="section">
+            <h2>Announcements</h2>
+            <div id="announcementActions">
+                <button onclick="getAllAnnouncements()">Get All Announcements</button>
+                <button onclick="showCreateForm()">Create New Announcement</button>
+            </div>
+            
+            <div id="createAnnouncementForm" style="display: none;">
+                <h3>Create Announcement</h3>
+                <input type="text" id="announcementTitle" placeholder="Title" required>
+                <textarea id="announcementContent" placeholder="Content"></textarea>
+                <button onclick="createAnnouncement()">Submit</button>
+                <button onclick="hideCreateForm()">Cancel</button>
+            </div>
+            
+            <div id="announcementsList"></div>
+            <div id="announcementsMessage"></div>
+        </div>
+    </div>
 
-<div class="login-container">
-    <h1>SynVotra</h1>
-    <form id="login-form">
-        <input type="text" id="username" placeholder="emp ID" required>
-        <input type="password" id="password" placeholder="password" required>
-        <a class="forgot-password" href="#">forgot password</a>
-        <button type="submit">LOGIN</button>
-        <div class="error" id="error-msg"></div>
-    </form>
-</div>
-
-<script>
-    const form = document.getElementById('login-form');
-    const errorMsg = document.getElementById('error-msg');
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        errorMsg.textContent = '';
-
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-
-        const formData = new URLSearchParams();
-        formData.append('username', username);
-        formData.append('password', password);
-
-        try {
-            const response = await fetch('http://localhost:8000/auth/token', {
+    <script>
+        // Base URL - change this to your API's base URL
+        const BASE_URL = 'http://127.0.0.1:8000';
+        
+        // DOM Elements
+        const loginMessageEl = document.getElementById('loginMessage');
+        const loggedInSectionEl = document.getElementById('loggedInSection');
+        const loginFormEl = document.getElementById('loginForm');
+        const announcementsListEl = document.getElementById('announcementsList');
+        const announcementsMessageEl = document.getElementById('announcementsMessage');
+        const createAnnouncementFormEl = document.getElementById('createAnnouncementForm');
+        const announcementActionsEl = document.getElementById('announcementActions');
+        
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('astrellect_token');
+            if (token) {
+                showLoggedInState();
+            }
+        });
+        
+        // Handle login
+        async function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showMessage('Please enter both username and password', 'error', loginMessageEl);
+                return;
+            }
+            
+            try {
+                const token = await login(username, password);
+                showMessage('Login successful!', 'success', loginMessageEl);
+                showLoggedInState();
+            } catch (error) {
+                showMessage('Login failed: ' + error.message, 'error', loginMessageEl);
+            }
+        }
+        
+        // Login function
+        async function login(username, password) {
+            const formData = new URLSearchParams();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('grant_type', 'password');
+            
+            const response = await fetch(`${BASE_URL}/astrellect/v1/auth/token`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: formData
+                body: formData,
             });
-
-            const data = await response.json();
-
+            
             if (!response.ok) {
-                throw new Error(data.detail || 'Login failed');
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.detail || 'Invalid credentials');
             }
-
-            localStorage.setItem('access_token', data.access_token);
-            alert('Login successful!');
-            // Redirect if needed
-            window.location.href = '/dashboard.html'; // Change this to your target page
-
-        } catch (err) {
-            errorMsg.textContent = err.message;
+            
+            const data = await response.json();
+            localStorage.setItem('astrellect_token', data.access_token);
+            return data.access_token;
         }
-    });
-</script>
-
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('astrellect_token');
+            loginFormEl.style.display = 'block';
+            loggedInSectionEl.style.display = 'none';
+            announcementsListEl.innerHTML = '';
+            showMessage('Logged out successfully', 'success', loginMessageEl);
+        }
+        
+        // Get all announcements
+        async function getAllAnnouncements() {
+            if (!localStorage.getItem('astrellect_token')) {
+                showMessage('Please login first', 'error', announcementsMessageEl);
+                return;
+            }
+            
+            try {
+                const announcements = await fetchWithToken(`${BASE_URL}/astrellect/v1/announcement/get-all`);
+                displayAnnouncements(announcements.announcements);
+            } catch (error) {
+                showMessage('Failed to fetch announcements: ' + error.message, 'error', announcementsMessageEl);
+            }
+        }
+        
+        // Create new announcement
+        async function createAnnouncement() {
+            const title = document.getElementById('announcementTitle').value;
+            const content = document.getElementById('announcementContent').value;
+            
+            if (!title) {
+                showMessage('Title is required', 'error', announcementsMessageEl);
+                return;
+            }
+            
+            try {
+                await fetchWithToken(
+                    `${BASE_URL}/astrellect/v1/announcement/create`,
+                    'POST',
+                    { title, content }
+                );
+                showMessage('Announcement created successfully!', 'success', announcementsMessageEl);
+                hideCreateForm();
+                getAllAnnouncements();
+            } catch (error) {
+                showMessage('Failed to create announcement: ' + error.message, 'error', announcementsMessageEl);
+            }
+        }
+        
+        // Helper function for authenticated requests
+        async function fetchWithToken(url, method = 'GET', body = null) {
+            const token = localStorage.getItem('astrellect_token');
+            
+            if (!token) {
+                throw new Error('No token found. Please login first.');
+            }
+            
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            };
+            
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            
+            const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                // If unauthorized, maybe token expired
+                if (response.status === 401) {
+                    localStorage.removeItem('astrellect_token');
+                    showLoggedInState();
+                    throw new Error('Session expired. Please login again.');
+                }
+                
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.detail || `Request failed with status ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+        
+        // UI Helper functions
+        function showLoggedInState() {
+            if (localStorage.getItem('astrellect_token')) {
+                loginFormEl.style.display = 'none';
+                loggedInSectionEl.style.display = 'block';
+            } else {
+                loginFormEl.style.display = 'block';
+                loggedInSectionEl.style.display = 'none';
+            }
+        }
+        
+        function showCreateForm() {
+            if (!localStorage.getItem('astrellect_token')) {
+                showMessage('Please login first', 'error', announcementsMessageEl);
+                return;
+            }
+            createAnnouncementFormEl.style.display = 'block';
+            announcementActionsEl.style.display = 'none';
+        }
+        
+        function hideCreateForm() {
+            createAnnouncementFormEl.style.display = 'none';
+            announcementActionsEl.style.display = 'block';
+            document.getElementById('announcementTitle').value = '';
+            document.getElementById('announcementContent').value = '';
+        }
+        
+        function displayAnnouncements(announcements) {
+            if (!announcements || announcements.length === 0) {
+                announcementsListEl.innerHTML = '<p>No announcements found</p>';
+                return;
+            }
+            
+            announcementsListEl.innerHTML = announcements.map(announcement => `
+                <div class="announcement">
+                    <h3>${announcement.title}</h3>
+                    <p>${announcement.content || 'No content'}</p>
+                    <small>Created at: ${new Date(announcement.created_at).toLocaleString()}</small>
+                </div>
+            `).join('');
+        }
+        
+        function showMessage(message, type, element) {
+            element.textContent = message;
+            element.className = type;
+            setTimeout(() => {
+                element.textContent = '';
+                element.className = '';
+            }, 5000);
+        }
+    </script>
 </body>
 </html>
