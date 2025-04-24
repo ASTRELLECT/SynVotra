@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact Number Edit</title>
+  <link rel="stylesheet" href="static/styles_v1_0_0.css">
+</head>
+<body>
+
+  <div class="contact-edit-container">
+    <label for="contact-number">Contact Number</label>
+    <div class="edit-row">
+      <input type="text" id="contact-number" value="9876543210" disabled>
+      <button onclick="enableEdit()">Edit</button>
+    </div>
+    <div id="verify-section" style="display: none;">
+      <input type="text" id="new-number" placeholder="Enter new number">
+      <button onclick="sendCode()">Send Verification Code</button>
+      <div class="code-verification">
+        <input type="text" placeholder="Enter verification code">
+        <button>Submit</button>
+        <button class="resend">Resend</button>
+      </div>
+      <span class="verified">&#10004; Verified</span>
+    </div>
+  </div>
+
+  <script src="static/scripts.js"></script>
+</body>
+</html>
