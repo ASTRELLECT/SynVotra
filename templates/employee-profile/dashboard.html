@@ -99,7 +99,7 @@
                     
                     <div class="password-actions">
                         <button class="btn btn-secondary" onclick="togglePasswordForm()">Cancel</button>
-                        <button class="btn btn-primary">Submit</button>
+                        <button class="btn btn-primary" onclick="passwordChange()">Submit</button>
                     </div>
                 </div>
             </div>
@@ -324,6 +324,60 @@
                 photoModal.style.display = 'none';
             }
         }
+        // Function to change Password
+        async function passwordChange() {
+            const token = localStorage.getItem('astrellect_token');
+        
+            if (!token) {
+                alert('User not logged in. Please log in again.');
+                return;
+            }
+        
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+        
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                alert('Please fill in all fields.');
+                return;
+            }
+        
+            if (newPassword !== confirmPassword) {
+                alert('New passwords do not match.');
+                return;
+            }
+        
+            try {
+                const response = await fetch(`${BASE_URL}/astrellect/v1/auth/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        old_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+        
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Password update failed.');
+                }
+        
+                alert('Password updated successfully!');
+                togglePasswordForm();
+        
+                // Optionally clear the fields
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+        
+            } catch (error) {
+                console.error('Error updating password:', error);
+                alert('Error updating password: ' + error.message);
+            }
+        }        
     </script>
 </body>
 </html>
