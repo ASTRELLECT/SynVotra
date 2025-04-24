@@ -2,7 +2,7 @@ import uuid
 import logging
 from datetime import datetime
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, Response, status
 
 from src.pydantic_model.companyPolicy import (
     CompanyPolicyCreate, 
@@ -33,19 +33,23 @@ async def get_all_policy(
     try:
         policy = db.query(CompanyPolicy).all()
         if not policy:
-            logger.warning("🚫 No company policies found.")
-            return {
-                "detail": "No company policies found.",
-                "status_code": status.HTTP_404_NOT_FOUND
-            }
-        logger.info("✅ Company policies retrieved successfully.")
+            logger.warning("❌ No company policies found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No company policies found"
+            )
+        logger.info("✅ Company policies retrieved successfully")
         return AllCompanyPolicyResponseList(company_policies=policy)
+
+    except HTTPException as http_exc:
+        raise http_exc
+
     except Exception as e:
         logger.error(f"❌ Unexpected error retrieving policies: {str(e)}")
-        return {
-            "detail": "An unexpected error occurred while retrieving all company policy.",
-            "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR
-        }
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving policies."
+        )
 
 @policy_router.post("/create_new_policy", status_code=status.HTTP_201_CREATED)
 async def create_policy(
@@ -142,7 +146,7 @@ async def update_policy(
             "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR
         }
 
-@policy_router.delete("/delete_policy/{policy_id}", status_code=status.HTTP_204_NO_CONTENT)
+@policy_router.delete("/delete_policy/{policy_id}", status_code=status.HTTP_200_OK)
 async def delete_policy(
     policy_id: uuid.UUID,
     db: Session = Depends(get_db),
