@@ -25,7 +25,7 @@ testimonials_router = APIRouter(
     tags=["Testimonials"]
 )
 
-@testimonials_router.get("", response_model=TestimonialListResponse)
+@testimonials_router.get("/get-all", response_model=TestimonialListResponse)
 async def get_testimonials(
     status: Optional[TestimonialStatus] = None,
     employee_id: Optional[str] = None,

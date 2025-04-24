@@ -1,0 +1,116 @@
+<div class="profile-container">
+    <h1>My Profile</h1>
+    
+    <div class="profile-content">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <img src="/api/placeholder/150/150" alt="Profile" id="profileAvatar">
+                <button id="changeAvatarBtn" class="btn btn-primary">Change Avatar</button>
+            </div>
+            <div class="profile-info">
+                <h2 id="profileName">Loading...</h2>
+                <p id="profileEmail">Loading...</p>
+                <p id="profileRole">Loading...</p>
+            </div>
+        </div>
+        
+        <div class="profile-details">
+            <div class="profile-section">
+                <h3>Personal Information</h3>
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" id="firstName" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" id="lastName" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="email" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Number</label>
+                        <input type="text" id="contactNumber">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="dob">
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea id="address"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-section">
+                <h3>Employment Information</h3>
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label>Employee ID</label>
+                        <input type="text" id="employeeId" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <input type="text" id="role" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" id="department" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Joining Date</label>
+                        <input type="date" id="joiningDate" disabled>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-actions">
+                <button id="editProfileBtn" class="btn btn-secondary">Edit Profile</button>
+                <button id="saveProfileBtn" class="btn btn-primary" disabled>Save Changes</button>
+                <button id="changePasswordBtn" class="btn btn-outline">Change Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Avatar Selection Modal -->
+<div id="avatarModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Select Avatar</h2>
+        <div class="avatar-grid">
+            <div class="avatar-option" data-avatar="avatar1">
+                <img src="/assets/avatars/avatar1.png" alt="Avatar 1">
+            </div>
+            <div class="avatar-option" data-avatar="avatar2">
+                <img src="/assets/avatars/avatar2.png" alt="Avatar 2">
+            </div>
+            <!-- More avatars can be added here -->
+        </div>
+        <button id="confirmAvatarBtn" class="btn btn-primary">Confirm Selection</button>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Change Password</h2>
+        <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="currentPassword">
+        </div>
+        <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPassword">
+        </div>
+        <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="confirmPassword">
+        </div>
+        <button id="submitPasswordBtn" class="btn btn-primary">Update Password</button>
+    </div>
+</div>

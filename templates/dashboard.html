@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynVotra - Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="static/assets/favicon.ico">
+    <link rel="stylesheet" href="static/dashboard.css">
+    <link rel="stylesheet" href="static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>SynVotra</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="#" data-page="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-page="profile">
+                            <i class="fas fa-user"></i>
+                            <span>My Profile</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-page="announcements">
+                            <i class="fas fa-bullhorn"></i>
+                            <span>Announcements</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-page="employees">
+                            <i class="fas fa-users"></i>
+                            <span>Employees</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-page="testimonials">
+                            <i class="fas fa-comment-dots"></i>
+                            <span>Testimonials</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-page="policies">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Company Policies</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="dashboard-header">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="header-user">
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count">0</span>
+                    </div>
+                    <div class="user-info">
+                        <img src="../static/uploads/avatars/avatar1.png" alt="User" id="userAvatar">
+                        <span id="userName">Loading...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="content-container">
+                <!-- Dashboard Overview -->
+                <div class="content-page active" id="dashboard-page">
+                    <h1>Dashboard Overview</h1>
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Employees</h3>
+                                <p id="employeeCount">Loading...</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Announcements</h3>
+                                <p id="announcementCount">Loading...</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Testimonials</h3>
+                                <p id="testimonialCount">Loading...</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Policies</h3>
+                                <p id="policyCount">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-recent">
+                        <div class="recent-announcements">
+                            <h2>Recent Announcements</h2>
+                            <div class="announcement-list" id="recentAnnouncements">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                        <div class="recent-testimonials">
+                            <h2>Recent Testimonials</h2>
+                            <div class="testimonial-list" id="recentTestimonials">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Page (loaded dynamically) -->
+                <div class="content-page" id="profile-page"></div>
+                
+                <!-- Announcements Page (loaded dynamically) -->
+                <div class="content-page" id="announcements-page"></div>
+                
+                <!-- Employees Page (loaded dynamically) -->
+                <div class="content-page" id="employees-page"></div>
+                
+                <!-- Testimonials Page (loaded dynamically) -->
+                <div class="content-page" id="testimonials-page"></div>
+                
+                <!-- Policies Page (loaded dynamically) -->
+                <div class="content-page" id="policies-page"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- <script src="static/js/common.js"></script> -->
+    <script type="module" src="static/js/dashboard.js"></script>
+</body>
+</html>

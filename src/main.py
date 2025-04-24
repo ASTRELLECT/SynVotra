@@ -101,19 +101,23 @@ def _get_app():
 
     @app.get("/")
     async def root(request: Request):
-        return templates.TemplateResponse("login/login.html", {"request": request})
+        return templates.TemplateResponse("landing.html", {"request": request})
     
-    @app.get("/policy")
-    async def companyPolicy(request: Request):
-        return templates.TemplateResponse("policy-documentation/policy.html", {"request": request})
-    @app.get("/admin-view")
-    async def adminView(request: Request):
-        return templates.TemplateResponse("admin/admin-view.html", {"request": request})
+    @app.get("/dashboard")
+    async def dashboard(request: Request):
+        return templates.TemplateResponse("dashboard.html", {"request": request})
+    
+    @app.get("/profile")
+    async def profile(request: Request):
+        return templates.TemplateResponse("profile.html", {"request": request})
+    
+    # @app.get("/policy")
+    # async def companyPolicy(request: Request):
+    #     return templates.TemplateResponse("policy-documentation/policy.html", {"request": request})
+    # @app.get("/admin-view")
+    # async def adminView(request: Request):
+    #     return templates.TemplateResponse("admin/admin-view.html", {"request": request})
 
-    @app.get("/employee-dashboard",response_class=HTMLResponse)
-    async def employeeDash(request:Request):
-        return templates.TemplateResponse('employee-profile/dashboard.html',{'request':request})
- 
     return app
 
 if __name__ == "__main__":
