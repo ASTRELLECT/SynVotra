@@ -116,7 +116,61 @@ async def get_user(user_id: uuid.UUID, db: Session = Depends(get_db), current_us
     except Exception as e:
         logger.error(f"❌ Error retrieving user: {str(e)}")
         return JSONResponse(status_code=500, content={"detail": "An unexpected error occurred while fetching user data."})
+
+@users_router.post("/create", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def create_user(
+    user: UserCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """
+    Create a new user
     
+    Requires: Valid JWT token with admin privileges
+    """
+    try:
+        existing_user = db.query(User).filter(User.email == user.email).first()
+        if existing_user:
+            logger.warning(f"409 - User with email {user.email} already exists")
+            return JSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content="User with this email already exists"
+            )
+
+        hashed_password = get_password_hash(user.password)
+
+        user_data = user.model_dump(exclude={"password"})
+
+        new_user = User(
+            id=uuid.uuid4(),
+            hashed_password=hashed_password,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            **user_data
+        )
+
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        logger.info(f"Admin {current_user.id} created new user with ID: {new_user.id}")
+        return new_user
+
+    except IntegrityError as e:
+        db.rollback()
+        logger.error(f"Database integrity error: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content="Could not create user due to database constraint"
+        )
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unexpected error creating user: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content="An unexpected error occurred"
+        )
+      
 @users_router.put("/update/{user_id}", response_model=UserResponse)
 async def update_user(
     user_id: uuid.UUID,
@@ -135,13 +189,13 @@ async def update_user(
             logger.warning(f"403 - User {current_user.id} attempted to update user {user_id}")
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not enough permissions to update this record"
+                content="Not enough permissions to update this record"
             )
 
         db_user = db.query(User).filter(User.id == user_id).first()
         if not db_user:
             logger.warning(f"404 - User with ID {user_id} not found")
-            return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content="User not found")
     except Exception as e:
         logger.error(f"Unexpected error checking user permissions: {str(e)}")
         return JSONResponse(
@@ -175,14 +229,14 @@ async def update_user(
         logger.error(f"Database integrity error: {str(e)}")
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Could not update user due to database constraint"
+            content="Could not update user due to database constraint"
         )
     except Exception as e:
         db.rollback()
         logger.error(f"Unexpected error updating user: {str(e)}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            content="An unexpected error occurred"
         )
 
 @users_router.put("/update_profile_picture")
