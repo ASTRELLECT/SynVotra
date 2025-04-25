@@ -204,7 +204,7 @@ async def update_profile_picture(
         logger.info(f"User {current_user.id} updated profile picture for user with ID: {user_id}")
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            detail="Profile picture updated successfully"
+            content={"detail": "Profile picture updated successfully"}
         )
 
     except Exception as e:
@@ -212,7 +212,7 @@ async def update_profile_picture(
         logger.error(f"Unexpected error updating profile picture: {str(e)}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            content={"detail": "An unexpected error occurred while updating profile picture."}
         )
 
 @users_router.delete("/delete/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
