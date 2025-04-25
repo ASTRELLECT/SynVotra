@@ -1,6 +1,6 @@
 import uuid
 import logging
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -36,6 +36,12 @@ async def get_all_announcements(
     """
     try:
         announcements = db.query(Announcement).all()
+        if not announcements:
+            logger.warning("⚠️ No announcements found.")
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "No announcements found."}
+            )
         logger.info("✅ Announcements retrieved successfully")
         return AnnouncementListResponse(announcements=announcements)
     except Exception as e:
@@ -167,7 +173,7 @@ async def create_Announcement(
         db.flush()
 
         employees = db.query(User).filter(User.role == UserRole.EMPLOYEE, User.is_active == True).all()
-
+        
         for employee in employees:
             recipient = AnnouncementRecipient(
                 id=uuid.uuid4(),
@@ -215,9 +221,9 @@ async def mark_announcement_as_read(
             AnnouncementRecipient.user_id == current_user.id
         ).first()
 
-        if not recipient:
+        if recipient is None:
             logger.warning("⚠️ No announcement corresponding to this user.")
-            return JSONResponse(
+            raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 content={"detail": "No announcement corresponding to this user."}
             )
