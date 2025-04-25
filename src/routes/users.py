@@ -117,10 +117,157 @@ async def get_user(user_id: uuid.UUID, db: Session = Depends(get_db), current_us
         logger.error(f"❌ Error retrieving user: {str(e)}")
         return JSONResponse(status_code=500, content={"detail": "An unexpected error occurred while fetching user data."})
 
-# Remaining routes follow same exact pattern:
-# Swap raise HTTPException to JSONResponse, add logger calls with emojis
+@users_router.post("/create", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def create_user(
+    user: UserCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """
+    Create a new user
+    
+    Requires: Valid JWT token with admin privileges
+    """
+    try:
+        existing_user = db.query(User).filter(User.email == user.email).first()
+        if existing_user:
+            logger.warning(f"409 - User with email {user.email} already exists")
+            return JSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content="User with this email already exists"
+            )
 
-# Example for delete_user:
+        hashed_password = get_password_hash(user.password)
+
+        user_data = user.model_dump(exclude={"password"})
+
+        new_user = User(
+            id=uuid.uuid4(),
+            hashed_password=hashed_password,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            **user_data
+        )
+
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        logger.info(f"Admin {current_user.id} created new user with ID: {new_user.id}")
+        return new_user
+
+    except IntegrityError as e:
+        db.rollback()
+        logger.error(f"Database integrity error: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content="Could not create user due to database constraint"
+        )
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unexpected error creating user: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content="An unexpected error occurred"
+        )
+
+@users_router.put("/update/{user_id}", response_model=UserResponse)
+async def update_user(
+    user_id: uuid.UUID,
+    user_update: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Update a user's information
+    
+    Requires: Valid JWT token. Regular users can only update their own record.
+    Admins can update any record.
+    """
+    try:
+        if not current_user.is_admin and str(current_user.id) != str(user_id):
+            logger.warning(f"403 - User {current_user.id} attempted to update user {user_id}")
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content="Not enough permissions to update this record"
+            )
+
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if not db_user:
+            logger.warning(f"404 - User with ID {user_id} not found")
+            return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content="User not found")
+    except Exception as e:
+        logger.error(f"Unexpected error checking user permissions: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred"
+        )
+    try:
+        update_data = user_update.model_dump(exclude_unset=True)
+
+        if not current_user.is_admin and "is_admin" in update_data:
+            del update_data["is_admin"]
+
+        if "password" in update_data:
+            hashed_password = get_password_hash(update_data["password"])
+            update_data["hashed_password"] = hashed_password
+            del update_data["password"]
+
+        update_data["updated_at"] = datetime.now()
+
+        for key, value in update_data.items():
+            setattr(db_user, key, value)
+
+        db.commit()
+        db.refresh(db_user)
+
+        logger.info(f"User {current_user.id} updated user with ID: {user_id}")
+        return db_user
+
+    except IntegrityError as e:
+        db.rollback()
+        logger.error(f"Database integrity error: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content="Could not update user due to database constraint"
+        )
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unexpected error updating user: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content="An unexpected error occurred"
+        )
+
+@users_router.put("/update_profile_picture")
+async def update_profile_picture(
+    avatar_update: AvatarUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Update a user's profile picture by selecting one of the predefined avatars
+    """
+    try:
+        user_id = current_user.id
+        db_user = db.query(User).filter(User.id == user_id).first()
+        db_user.profile_picture_url = avatar_update.avatar_type.value
+        db_user.updated_at = datetime.now()
+        db.commit()
+        db.refresh(db_user)
+        logger.info(f"User {current_user.id} updated profile picture for user with ID: {user_id}")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"detail": "Profile picture updated successfully"}
+        )
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unexpected error updating profile picture: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "An unexpected error occurred while updating profile picture."}
+        )
 
 @users_router.delete("/delete/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
