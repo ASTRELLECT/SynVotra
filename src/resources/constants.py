@@ -30,3 +30,7 @@ if not os.path.exists(AVATARS_DIR):
     os.makedirs(AVATARS_DIR)
     
 DATABASE_URL = f"sqlite:///{os.path.join(DATABASE_DIR, 'astrellect.db')}"
+
+# These are the *URL paths* served to the frontend for avatar display
+AVATAR_1_URL = "/static/uploads/avatars/avatar1.png"
+AVATAR_2_URL = "/static/uploads/avatars/avatar2.png"

@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
 from src.database import get_db
-from src.database.models import User
+from src.database.models import User, Avatar
 from src.utils.utils import get_password_hash
 from src.auth.auth import get_current_user, get_admin_user
 from src.pydantic_model.users import (
@@ -17,7 +17,6 @@ from src.pydantic_model.users import (
     UserResponse, 
     UserListResponse,
     UserAttribute, 
-    AvatarType, 
     AvatarUpdate
 )
 
@@ -239,23 +238,50 @@ async def update_user(
             content="An unexpected error occurred"
         )
 
-@users_router.put("/update_profile_picture")
+@users_router.get("/{user_id}/avatars")
+async def get_avatars(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        # Query avatars from database
+        avatars = db.query(Avatar).all()
+        
+        # Format response
+        avatar_list = [{"id": avatar.id, "name": avatar.name, "url": avatar.url} for avatar in avatars]
+        
+        return JSONResponse(status_code=200, content={"avatars": avatar_list})
+    except Exception as e:
+        logger.error(f"Failed to fetch avatars: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Failed to fetch avatars: {str(e)}"}
+        )
+
+@users_router.put("/profile-picture")
 async def update_profile_picture(
     avatar_update: AvatarUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """
-    Update a user's profile picture by selecting one of the predefined avatars
-    """
     try:
+        # Verify the avatar exists
+        avatar = db.query(Avatar).filter(Avatar.id == avatar_update.avatar_id).first()
+        if not avatar:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "Avatar not found"}
+            )
+        
+        # Update the user's profile picture
         user_id = current_user.id
         db_user = db.query(User).filter(User.id == user_id).first()
-        db_user.profile_picture_url = avatar_update.avatar_type.value
+        db_user.profile_picture_url = avatar.url
         db_user.updated_at = datetime.now()
         db.commit()
         db.refresh(db_user)
-        logger.info(f"User {current_user.id} updated profile picture for user with ID: {user_id}")
+        
+        logger.info(f"User {current_user.id} updated profile picture using avatar: {avatar.name}")
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"detail": "Profile picture updated successfully"}

@@ -363,3 +363,10 @@ class Testimonial(Base):
     
     # Relationships
     user = relationship("User", back_populates="testimonials")
+
+class Avatar(Base):
+    __tablename__ = "avatars"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    url = Column(String, nullable=False)  
