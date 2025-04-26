@@ -99,9 +99,12 @@ def _get_app():
     for route in ACTIVE_ROUTES.values():
         app.include_router(route, prefix=ASTRELLECT_API_VERSION)
 
+    @app.get("/login")
+    async def login(request: Request):
+        return templates.TemplateResponse("login/login.html", {"request": request})
     @app.get("/")
     async def root(request: Request):
-        return templates.TemplateResponse("login/login.html", {"request": request})
+        return templates.TemplateResponse("landing-page.html", {"request": request})
     
     @app.get("/policy")
     async def companyPolicy(request: Request):
