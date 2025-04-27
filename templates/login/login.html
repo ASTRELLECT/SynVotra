@@ -370,7 +370,7 @@
         try {
           const token = await login(username, password);
           showMessage("Login successful!", "success", loginMessageEl);
-          showLoggedInState();
+          window.location.href = "/home";
         } catch (error) {
           showMessage(
             "Login failed: " + error.message,
