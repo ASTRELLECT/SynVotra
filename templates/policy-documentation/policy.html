@@ -5,41 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/static/company-policy/styles_v1_0_0.css" rel="stylesheet">
     <title>Company Policy</title>
+    
+    <!-- Common CSS -->
+    <link href="/static/components/common-styles.css" rel="stylesheet">
+    
+    <!-- Dashboard-specific CSS -->
+    <link href="/static/dashboard/styles_v1_0_0.css" rel="stylesheet">
+    
+    <!-- Material Icons and Font Awesome -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+    <!-- Components Loader Script -->
+    <script src="/static/common-script/components-loader.js"></script>
+    
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="logo">
+    <div class="container">
+        <!-- Sidebar will be loaded here -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header will be loaded here - this stays fixed -->
+            <div id="header-container"></div>
+            <!-- The corresponding UI should be loaded here. -->
+            <!-- Page Header -->
+            <div class="page-header">
                 <h1>Company Policy</h1>
             </div>
-        </div>
-    </header>
-
-    <div class="container">
-
-        <div class="search-container">
-            <div class="search-form">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search policies by title, keyword, or content..." onkeyup="searchPolicies()">
-                <button class="search-btn" onclick="searchPolicies()">
-                    Search
-                </button>
+            
+            <!-- Scrollable Content -->
+            <div class="scrollable-content">
+                <!-- Search Container -->
+                <div class="search-container">
+                    <div class="search-form">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Search policies by title, keyword, or content..." onkeyup="searchPolicies()">
+                        <button class="search-btn" onclick="searchPolicies()">
+                            Search
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Category Tabs -->
+                <div class="category-tabs">
+                    <div class="category-tab active" onclick="filterByCategory('all')">All Policies</div>
+                    <div class="category-tab" onclick="filterByCategory('hr')">HR Policies</div>
+                    <div class="category-tab" onclick="filterByCategory('it')">IT Policies</div>
+                    <div class="category-tab" onclick="filterByCategory('safety')">Safety Guidelines</div>
+                </div>
+                
+                <!-- Loading Spinner -->
+                <div class="spinner" id="loadingSpinner"></div>
+                
+                <!-- Policies Container -->
+                <div class="policies-container" id="policiesContainer">
+                    <!-- Policies will be loaded here dynamically -->
+                </div>
             </div>
         </div>
-
-        <div class="category-tabs">
-            <div class="category-tab active" onclick="filterByCategory('all')">All Policies</div>
-            <div class="category-tab" onclick="filterByCategory('hr')">HR Policies</div>
-            <div class="category-tab" onclick="filterByCategory('it')">IT Policies</div>
-            <div class="category-tab" onclick="filterByCategory('safety')">Safety Guidelines</div>
-        </div>
-
-        <div class="spinner" id="loadingSpinner"></div>
-
-        <div class="policies-container" id="policiesContainer">
-            <!-- Policies will be loaded here dynamically -->
-        </div>
     </div>
-
+    
     <!-- Policy View Modal -->
     <div id="policyModal" class="modal">
         <div class="modal-content">
@@ -57,7 +83,7 @@
             <div id="modalBody">
                 <!-- Policy content will be inserted here -->
             </div>
-            <div class="modal-footer">
+            <!-- <div class="modal-footer">
                 <a href="#" id="downloadLink" class="download-btn" target="_blank">
                     <svg class="download-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
@@ -65,51 +91,55 @@
                     </svg>
                     Download PDF
                 </a>
-            </div>
+            </div> -->
         </div>
     </div>
-
+    
     <script>
         const BASE_URL = 'http://127.0.0.1:8000';
+        
         // Function to fetch user data when the page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadPolicies();
         });
+        
+        // Fetch policies from API
         async function fetchPolicies() {
-    try {
-        showLoading(true);
-        
-        const token = localStorage.getItem('astrellect_token');
-        
-        if (!token) {
-            console.error('No authentication token found');
-            showErrorMessage('Please log in to view your profile');
-            return [];  // Return empty array instead of undefined
-        }
-        
-        const response = await fetch('/astrellect/v1/policy/getall', {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
+            try {
+                showLoading(true);
+                
+                const token = localStorage.getItem('astrellect_token');
+                
+                if (!token) {
+                    console.error('No authentication token found');
+                    showErrorMessage('Please log in to view your profile');
+                    return [];  // Return empty array instead of undefined
+                }
+                
+                const response = await fetch('/astrellect/v1/policy/getall', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch policy data');
+                }
+                
+                const data = await response.json();
+                
+                // Extract the company_policies array from the response
+                return data.company_policies || [];
+            } catch (error) {
+                console.error('Error fetching policies:', error);
+                return [];
+            } finally {
+                showLoading(false);
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch policy data');
         }
         
-        const data = await response.json();
-        
-        // Extract the company_policies array from the response
-        return data.company_policies || [];
-    } catch (error) {
-        console.error('Error fetching policies:', error);
-        return [];
-    } finally {
-        showLoading(false);
-    }
-}
         // Show or hide loading spinner
         function showLoading(show) {
             document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
@@ -175,16 +205,7 @@
                         <p>${policy.description}</p>
                         <p class="policy-status">${statusIndicator}</p>
                     </div>
-                    <div class="policy-footer">
-                        <button class="view-btn" onclick="viewPolicy('${policy.id}')">View Details</button>
-                        <a href="${policy.document_url}" class="download-btn" target="_blank">
-                            <svg class="download-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-                            </svg>
-                            PDF
-                        </a>
-                    </div>
+                    
                 `;
                 container.appendChild(card);
             });
@@ -246,7 +267,7 @@
                 `;
             }
             
-            // Set modal body content (would typically be fetched from the API)
+            // Set modal body content
             document.getElementById('modalBody').innerHTML = `
                 <p>${policy.description}</p>
                 <p>To view the complete policy, please download the PDF document.</p>
@@ -256,7 +277,7 @@
             document.getElementById('downloadLink').href = policy.document_url;
             
             // Show modal
-            document.getElementById('policyModal').style.display = 'block';
+            document.getElementById('policyModal').style.display = 'flex';
         }
         
         // Close modal
@@ -274,7 +295,7 @@
         
         // Event listener for escape key to close modal
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && document.getElementById('policyModal').style.display === 'block') {
+            if (event.key === 'Escape' && document.getElementById('policyModal').style.display === 'flex') {
                 closeModal();
             }
         });

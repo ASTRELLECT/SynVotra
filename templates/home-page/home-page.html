@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synvotra Employee Portal - Dashboard</title>
+    
+    <!-- Common CSS -->
+    <link href="/static/components/common-styles.css" rel="stylesheet">
+    
+    <!-- Dashboard-specific CSS -->
+    <link href="/static/dashboard/styles_v1_0_0.css" rel="stylesheet">
+    
+    <!-- Material Icons and Font Awesome -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+    <!-- Components Loader Script -->
+    <script src="/static/common-script/components-loader.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar will be loaded here -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header will be loaded here -->
+            <div id="header-container"></div>
+
+            <!-- Dashboard-specific content starts here -->
+             <div class="main-content-div">
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="material-icons">access_time</i>
+                    </div>
+                    <div class="action-title">Clock In/Out</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="material-icons">edit_calendar</i>
+                    </div>
+                    <div class="action-title">Apply Leave</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="material-icons">add_task</i>
+                    </div>
+                    <div class="action-title">Create Ticket</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="material-icons">person_add</i>
+                    </div>
+                    <div class="action-title">Refer</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="material-icons">calendar_today</i>
+                    </div>
+                    <div class="action-title">Events</div>
+                </div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Attendance Summary</h3>
+                        <div class="card-icon">
+                            <i class="material-icons">access_time</i>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat">
+                            <div class="stat-value">21</div>
+                            <div class="stat-label">Days Present</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">168</div>
+                            <div class="stat-label">Hours Worked</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="card-action">View Details <i class="material-icons">arrow_forward</i></a>
+                        <span class="card-badge badge-success">On Track</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Leave Balance</h3>
+                        <div class="card-icon">
+                            <i class="material-icons">event_available</i>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Vacation Days</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Sick Days</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="card-action">Apply Leave <i class="material-icons">arrow_forward</i></a>
+                        <span class="card-badge badge-warning">Leave Pending</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Support Tickets</h3>
+                        <div class="card-icon">
+                            <i class="material-icons">support</i>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat">
+                            <div class="stat-value">1</div>
+                            <div class="stat-label">Open Tickets</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">Closed This Month</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="card-action">View Tickets <i class="material-icons">arrow_forward</i></a>
+                        <span class="card-badge badge-success">All Good</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+    </div>
+</body>
+</html>
