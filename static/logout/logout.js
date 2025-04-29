@@ -5,6 +5,7 @@ const loginFormEl = document.getElementById("loginForm");
 const loggedInSectionEl = document.getElementById("loggedInSection");
 const loginMessageEl = document.getElementById("loginMessage");
 
+
 // Logout function
 function logout() {
   localStorage.removeItem("astrellect_token");
