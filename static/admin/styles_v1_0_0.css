@@ -136,7 +136,7 @@ body {
 }
 .apro-modal-content {
   background-color: #fefefe;
-  margin: 8% auto;
+  margin: 7% auto;
   padding: 20px;
   border: 1px solid #888;
   width: 400px;
@@ -154,4 +154,7 @@ body {
 .apro-modal-content input {
   width: 100%;
   padding: 10px;
+}
+form#editForm {
+  margin-top: 5px;
 }
