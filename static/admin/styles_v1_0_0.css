@@ -56,6 +56,22 @@ body {
   padding: 30px;
   background-color: #ecf0f1;
 }
+.apro-topbar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  align-content: center;
+}
+
+button.apro-logout {
+  padding: 10px;
+  border-radius: 5px;
+  background: #000;
+  color: #ffffff;
+  cursor: pointer;
+}
 
 .apro-content h1 {
   margin-bottom: 20px;

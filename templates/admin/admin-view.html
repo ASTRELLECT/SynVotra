@@ -5,20 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Employee Profiles</title>
     <link href="/static/admin/styles_v1_0_0.css" rel="stylesheet" />
+    <script src="/static/common-script/components-loader.js"></script>
   </head>
   <body>
     <div class="apro-container">
       <nav class="apro-sidebar">
         <h3>Admin Panel</h3>
         <ul>
-          <li><a href="#">Dashboard</a></li>
+          <li><a href="/admin-dash">Dashboard</a></li>
           <li><a class="apro-active" href="#">Employee Profiles</a></li>
-          <li><a href="#">Leave Requests</a></li>
+          <li><a href="/admin-leave">Leave Requests</a></li>
         </ul>
       </nav>
 
       <main class="apro-content">
-        <h2>Employee Profiles</h2>
+        <div class="apro-topbar">
+          <h2>Employee Profiles</h2>
+          <button class="apro-logout" onclick="logout()">Logout</button>
+        </div>
         <br />
         <div id="apro-error" class="apro-error"></div>
         <table class="apro-table">
