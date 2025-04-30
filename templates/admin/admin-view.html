@@ -21,7 +21,7 @@
       <main class="apro-content">
         <div class="apro-topbar">
           <h2>Employee Profiles</h2>
-          <button class="apro-logout" onclick="logout()">Logout</button>
+          <button class="apro-btn" onclick="logout()">Logout</button>
         </div>
         <br />
         <div id="apro-error" class="apro-error"></div>
@@ -43,6 +43,35 @@
           <tbody id="apro-table-body"></tbody>
         </table>
       </main>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="editModal" class="apro-modal" style="display: none">
+      <div class="apro-modal-content">
+        <span class="apro-close" onclick="closeModal()">&times;</span>
+        <h3>Edit Employee</h3>
+        <form id="editEmployeeForm">
+          <label>Name:</label><br />
+          <input type="text" id="editName" /><br /><br />
+
+          <label>Contact:</label><br />
+          <input type="text" id="editContact" /><br /><br />
+
+          <label>Date of Birth:</label><br />
+          <input type="date" id="editDOB" /><br /><br />
+
+          <label>Address:</label><br />
+          <input type="text" id="editAddress" /><br /><br />
+
+          <label>Email:</label><br />
+          <input type="email" id="editEmail" />
+          <br /><br />
+          <button type="submit" class="apro-btn" style="float: right">
+            Save Changes
+          </button>
+          <br /><br />
+        </form>
+      </div>
     </div>
 
     <script>
@@ -102,7 +131,10 @@
                   <td>${emp.email || "-"}</td>
                   <td>${formatDate(emp.joining_date)}</td>
                   <td>${emp.reporting_manager_id || "-"}</td>
-                  <td><button class="apro-edit-btn" onclick="alert('User story 2.6')">Edit</button></td>
+                  <td><button class="apro-edit-btn" onclick='openEditModal(${JSON.stringify(
+                    emp
+                  )})'>Edit</button></td>
+
                 </tr>
               `;
             tableBody.insertAdjacentHTML("beforeend", row);
@@ -111,6 +143,23 @@
           console.error("Error loading employee data:", error);
           showErrorMessage("Could not load employee data");
         }
+      }
+
+      function openEditModal(emp) {
+        document.getElementById("editModal").style.display = "block";
+        document.getElementById("editName").value = `${emp.first_name || ""} ${
+          emp.last_name || ""
+        }`;
+        document.getElementById("editContact").value = emp.contact_number || "";
+        document.getElementById("editDOB").value = emp.dob
+          ? emp.dob.split("T")[0]
+          : "";
+        document.getElementById("editAddress").value = emp.address || "";
+        document.getElementById("editEmail").value = emp.email || "";
+      }
+
+      function closeModal() {
+        document.getElementById("editModal").style.display = "none";
       }
     </script>
   </body>
