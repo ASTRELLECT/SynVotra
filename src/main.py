@@ -140,7 +140,11 @@ def _get_app():
     @app.get("/employee-dashboard",response_class=HTMLResponse)
     async def employeeDash(request:Request):
         return templates.TemplateResponse('employee-profile/dashboard.html',{'request':request})
- 
+    
+    @app.get("/testimonial", response_class=HTMLResponse)
+    async def testimonialDisplay(request: Request):
+        return templates.TemplateResponse('testimonial/testimonial-display.html', {'request': request})
+
     return app
 
 if __name__ == "__main__":
