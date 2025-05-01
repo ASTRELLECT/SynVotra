@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Synvotra Employee Portal</title>
+      
+    <!-- Common CSS -->
+    <link href="/static/components/common-styles.css" rel="stylesheet">
+    
+    <!-- Dashboard-specific CSS -->
+    <link href="/static/dashboard/styles_v1_0_0.css" rel="stylesheet">
+    
+    <!-- Material Icons and Font Awesome -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+    <!-- Components Loader Script -->
+    <script src="/static/common-script/components-loader.js"></script>
+  <!-- Styles -->
+  <style>
+    /* Variables */
+    :root {
+      --primary: #090a11;
+      --primary-light: #33353b;
+      --primary-dark: #090a0f;
+      --secondary: #f50057;
+      --light-gray: #f5f5f5;
+      --medium-gray: #e0e0e0;
+      --dark-gray: #757575;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --white: #ffffff;
+      --shadow: 0 2px 5px rgba(0,0,0,0.15);
+      --border: #e5e7eb;
+    }
+
+    /* Reset and basic styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--light-gray);
+      background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+      color: var(--dark-gray);
+      padding: 0;
+      margin: 0;
+    }
+
+    body::before {
+      content: "SynVotra";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 6rem;
+      color: rgba(0, 0, 0, 0.04);
+      white-space: nowrap;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background-color: var(--primary);
+      color: var(--white);
+      padding: 20px 0;
+      height: 100vh;
+      position: fixed;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      z-index: 10;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--primary-light);
+      text-align: center;
+    }
+
+    .company-logo {
+      height: 60px;
+      margin-bottom: 10px;
+      background-color: var(--white);
+      border-radius: 50%;
+      padding: 5px;
+    }
+
+    .sidebar-menu {
+      margin-top: 20px;
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 5px;
+    }
+
+    .sidebar-menu a {
+      padding: 12px 20px;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .sidebar-menu a:hover,
+    .sidebar-menu a.active {
+      background-color: var(--primary-light);
+      border-right: 4px solid var(--secondary);
+    }
+
+    .sidebar-menu a i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      background-color: var(--white);
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .search-bar {
+      flex: 1;
+      max-width: 600px;
+      position: relative;
+      margin-right: 20px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid var(--medium-gray);
+      border-radius: 25px;
+      font-size: 14px;
+    }
+
+    .search-bar button {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--dark-gray);
+      cursor: pointer;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background-color: var(--medium-gray);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 10px;
+    }
+
+    .user-avatar i {
+      font-size: 24px;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-role {
+      font-size: 12px;
+      color: var(--dark-gray);
+    }
+
+    /* Testimonials Section */
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .testimonial-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .testimonial-card img {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+    }
+
+    .testimonial-info {
+      flex: 1;
+    }
+
+    .testimonial-info h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .testimonial-info small {
+      display: block;
+      color: gray;
+    }
+
+    .testimonial-info p {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .timestamp {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 0.5rem;
+    }
+
+    .actions button {
+      background: none;
+      border: none;
+      color: var(--primary-dark);
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+
+    form {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      margin-top: 2rem;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .form-buttons button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button[type="submit"] {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    button[type="submit"]:hover {
+      background-color: var(--primary-light);
+    }
+
+    #clear-btn {
+      background-color: #6b7280;
+      color: white;
+    }
+
+    #clear-btn:hover {
+      background-color: #4b5563;
+    }
+
+    #preview-img {
+      margin-top: 1rem;
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      display: none;
+    }
+
+    /* Material Icons */
+    .material-icons {
+      font-family: 'Material Icons';
+      font-size: 24px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- Sidebar -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    
+    <!-- Header -->
+    <div class="header">
+      <div class="search-bar">
+        <input type="text" placeholder="Search across the portal...">
+        <button><i class="material-icons">search</i></button>
+      </div>
+      <div class="user-menu">
+        <div class="user-avatar"><i class="user-avatar"></i></div>
+        <div class="user-info">
+            <div class="user-name" id="fullName">Loading...</div>
+            <div class="user-role" id="jobTitle">Loading...</div>
+          </div>
+          
+      </div>
+    </div>
+
+    <!-- Testimonials -->
+    <h2>🌟 Employee Testimonials</h2>
+    <div id="testimonial-list"></div>
+
+    <form id="testimonial-form">
+      <h3 id="form-title">📝 Submit Your Testimonial</h3>
+      <textarea id="message" rows="4" placeholder="Your Message..." required></textarea>
+      <img id="preview-img" alt="Preview">
+      <div class="form-buttons">
+        <button type="submit">Submit</button>
+        <button type="button" id="clear-btn">Clear</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async function() {
+      await fetchUserData();
+  });
+  async function fetchUserData() {
+      try {
+          // Get token from localStorage (you need to set this when user logs in)
+          const token = localStorage.getItem('astrellect_token');
+          
+          if (!token) {
+              console.error('No authentication token found');
+              showErrorMessage('Please log in to view your profile');
+              return;
+          }
+          
+          // Make API request to get user data
+          const response = await fetch('/astrellect/v1/employees/get-me', {
+              method: 'GET',
+              headers: {
+                  'Authorization': 'Bearer ' + token,
+                  'Content-Type': 'application/json'
+              }
+          });
+          
+          if (!response.ok) {
+              throw new Error('Failed to fetch user data');
+          }
+          
+          const userData = await response.json();
+          console.log(userData,'userData')
+          if (userData.reporting_manager_id) {
+              // Second API call - Get reporting manager details using the ID
+              // Add the authorization header here as well
+              const managerResponse = await fetch(`/astrellect/v1/employees/${userData.reporting_manager_id}`, {
+                  method: 'GET',
+                  headers: {
+                      'Authorization': 'Bearer ' + token,
+                      'Content-Type': 'application/json'
+                  }
+              });
+              
+              if (!managerResponse.ok) {
+                  throw new Error('Failed to fetch manager data');
+              }
+              
+              const managerInfo = await managerResponse.json();
+              userData.reporting_manager_name = managerInfo.first_name || 'Unknown';
+          } else {
+              userData.reporting_manager_name = 'None assigned';
+          }
+          updateProfileUI(userData);
+      } catch (error) {
+          console.error('Error fetching user data:', error);
+          showErrorMessage('Could not load profile data');
+      }
+  }
+  
+  // Function to update UI with user data
+  function updateProfileUI(userData) {
+      // Update header section
+      document.getElementById('headerName').textContent = userData.first_name || 'N/A';
+      document.getElementById('headerJobTitle').textContent = userData.role || 'N/A';
+      
+      // Update main profile info
+      document.getElementById('fullName').textContent = userData.first_name || 'N/A';
+      document.getElementById('jobTitle').textContent = userData.role || 'N/A';
+      document.getElementById('contactNumber').textContent = userData.contact_number || 'N/A';
+      document.getElementById('dob').textContent = formatDate(userData.dob) || 'N/A';
+      document.getElementById('address').textContent = userData.address || 'N/A';
+      document.getElementById('email').textContent = userData.email || 'N/A';
+      document.getElementById('joiningDate').textContent = formatDate(userData.joining_date) || 'N/A';
+      document.getElementById('manager').textContent = userData.reporting_manager_name || 'N/A';
+      
+      // Update photo if available
+      if (userData.profile_photo) {
+          document.getElementById('profilePhotoDisplay').src = userData.profile_photo;
+      }
+      
+      // Pre-fill the contact modal with current number
+      document.getElementById('newContactNumber').value = userData.contact_number || '';
+  }
+  
+  // Helper function to format dates
+  function formatDate(dateString) {
+      if (!dateString) return '';
+      
+      try {
+          const date = new Date(dateString);
+          
+          if (isNaN(date.getTime())) {
+              return dateString; // Return original if parsing fails
+          }
+          
+          const day = date.getDate();
+          const month = date.toLocaleString('default', { month: 'long' });
+          const year = date.getFullYear();
+          
+          return `${day} ${month} ${year}`;
+      } catch (error) {
+          console.error('Error formatting date:', error);
+          return dateString; // Return original on error
+      }
+  }
+  
+  // Function to display error messages
+  function showErrorMessage(message) {
+      // Update key elements to show error
+      document.getElementById('headerName').textContent = 'Error';
+      document.getElementById('headerJobTitle').textContent = message;
+      
+      // Update all values with error message
+      const infoValues = document.querySelectorAll('.info-value');
+      infoValues.forEach(el => {
+          if (!el.classList.contains('contact-edit-container')) {
+              el.textContent = 'Error loading data';
+          }
+      });
+      
+      document.getElementById('contactNumber').textContent = 'Error loading data';
+  }
+  
+  // Function to open and close edit contact number modal
+  function showContactModal() {
+      document.getElementById('contactModal').style.display = 'block';
+  }
+  
+  function closeContactModal() {
+      document.getElementById('contactModal').style.display = 'none';
+  }
+  
+  function updateContactNumber() {
+      const newNumber = document.getElementById('newContactNumber').value;
+      document.getElementById('contactNumber').textContent = newNumber;
+      closeContactModal();
+  }
+  
+    const form = document.getElementById('testimonial-form');
+    const messageInput = document.getElementById('message');
+    const clearBtn = document.getElementById('clear-btn');
+    const formTitle = document.getElementById('form-title');
+    const previewImg = document.getElementById('preview-img');
+    const testimonialList = document.getElementById('testimonial-list');
+    
+    const BASE_URL = "http://127.0.0.1:8000";
+    const API_BASE = `${BASE_URL}/astrellect/v1/testimonials`;
+    const token = localStorage.getItem('astrellect_token');
+    const userNameElement = document.getElementById('user-name');
+  const userRoleElement = document.getElementById('user-role');
+  const userAvatarElement = document.getElementById('user-avatar');
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message) return;
+  
+      try {
+        const response = await fetch(`${API_BASE}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ content: message })
+        });
+  
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || 'Failed to submit testimonial');
+        }
+  
+        alert('✅ Testimonial submitted successfully!');
+        form.reset();
+        previewImg.style.display = 'none';
+        formTitle.textContent = "📝 Submit Your Testimonial";
+
+      } catch (error) {
+        alert(`❌ Error: ${error.message}`);
+      }
+    });
+
+    clearBtn.addEventListener('click', function () {
+      form.reset();
+      previewImg.style.display = 'none';
+      formTitle.textContent = "📝 Submit Your Testimonial";
+    });
+</script>
+</body>
+</html>
