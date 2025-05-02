@@ -11,14 +11,37 @@ import uvicorn
 from src.routes import ACTIVE_ROUTES
 from src.resources.constants import ASTRELLECT_API_VERSION
 from src.database import models, engine, Base, SessionLocal
-from src.database.models import User, UserRole
+from src.database.models import User, UserRole, Avatar
 from src.resources.constants import  STATIC_DIR, TEMPLATES_DIR
 from src.utils.utils import get_password_hash
 from fastapi.responses import HTMLResponse
-
+from sqlalchemy.orm import Session
+from src.resources.constants import AVATAR_1_URL, AVATAR_2_URL
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def init_seed_avatars(db: Session):
+    # Check if avatars already exist
+    if db.query(Avatar).count() == 0:
+        # Add default avatars
+        avatars = [
+            Avatar(
+                
+                name="Avatar 1",
+                url= AVATAR_1_URL
+                
+            ),
+            Avatar(
+                name="Avatar 2",
+                url= AVATAR_2_URL
+            ),
+        ]
+        db.add_all(avatars)
+        db.commit()
+        print("✅ Default avatars created")
+    else:
+        print("✅ Avatars already exist")
 
 def init_admin_user():
     """Initialize admin user if it doesn't exist"""
@@ -52,6 +75,10 @@ def init_admin_user():
         else:
             logger.info("✅ Admin user already exists")
             logger.info("✅ Employee user already exists")
+        # seed default existing avatars into the database    
+        init_seed_avatars(db)
+        logger.info("✅ Avatars seeded successfully")
+
     except Exception as e:
         logger.error(f"Error creating admin user: {e}")
     finally:
