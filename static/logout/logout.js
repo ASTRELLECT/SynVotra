@@ -5,7 +5,6 @@ const loginFormEl = document.getElementById("loginForm");
 const loggedInSectionEl = document.getElementById("loggedInSection");
 const loginMessageEl = document.getElementById("loginMessage");
 
-
 // Logout function
 function logout() {
   localStorage.removeItem("astrellect_token");
@@ -21,7 +20,7 @@ function logout() {
 // Helper function to show message (needs to match your app's style)
 function showMessage(message, type, element) {
   const messageEl = document.createElement("div");
-  messageEl.className = message ${type};
+  messageEl.className = `message ${type}`;
   messageEl.textContent = message;
 
   // Clear any existing messages
