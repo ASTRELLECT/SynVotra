@@ -129,6 +129,7 @@ def _get_app():
     @app.get("/")
     async def root(request: Request):
         return templates.TemplateResponse("login/login.html", {"request": request})
+    
     @app.get("/home")
     async def root(request: Request):
         return templates.TemplateResponse("home-page/home-page.html", {"request": request})
