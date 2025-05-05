@@ -5,20 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Employee Profiles</title>
     <link href="/static/admin/styles_v1_0_0.css" rel="stylesheet" />
+    <script src="/static/common-script/components-loader.js"></script>
   </head>
   <body>
     <div class="apro-container">
       <nav class="apro-sidebar">
         <h3>Admin Panel</h3>
         <ul>
-          <li><a href="#">Dashboard</a></li>
+          <li><a>Dashboard</a></li>
           <li><a class="apro-active" href="#">Employee Profiles</a></li>
-          <li><a href="#">Leave Requests</a></li>
+          <li><a>Leave Requests</a></li>
         </ul>
       </nav>
 
       <main class="apro-content">
-        <h2>Employee Profiles</h2>
+        <div class="apro-topbar">
+          <h2>Employee Profiles</h2>
+          <button class="apro-btn" onclick="logout()">Logout</button>
+        </div>
         <br />
         <div id="apro-error" class="apro-error"></div>
         <table class="apro-table">
@@ -41,8 +45,39 @@
       </main>
     </div>
 
+    <!-- Modal Structure -->
+    <div id="editModal" class="apro-modal" style="display: none">
+      <div class="apro-modal-content">
+        <span class="apro-close" onclick="closeModal()">&times;</span>
+        <h3>Edit Employee</h3>
+        <form id="editForm">
+          <label>Name:</label><br />
+          <input type="text" id="editName" required /><br /><br />
+
+          <label>Contact:</label><br />
+          <input type="text" id="editContact" /><br /><br />
+
+          <label>Date of Birth:</label><br />
+          <input type="date" id="editDOB" /><br /><br />
+
+          <label>Address:</label><br />
+          <input type="text" id="editAddress" /><br /><br />
+
+          <label>Email:</label><br />
+          <input type="email" id="editEmail" required />
+          <br /><br />
+          <button type="submit" class="apro-btn" style="float: right">
+            Save Changes
+          </button>
+          <br /><br />
+        </form>
+      </div>
+    </div>
+
     <script>
+      let editingUser = null;
       const BASE_URL = "http://127.0.0.1:8000";
+      const managerCache = new Map(); // cache to avoid repeated requests
 
       document.addEventListener("DOMContentLoaded", loadEmployees);
 
@@ -85,27 +120,156 @@
 
           for (const emp of data.result) {
             const row = `
-                <tr>
-                  <td><img class="apro-profile-pic" src="${
-                    emp.profile_picture_url ||
-                    "/static/uploads/avatars/avatar1.png"
-                  }" alt="Profile" /></td>
-                  <td>${getName(emp.first_name, emp.last_name)}</td>
-                  <td>${emp.role || "-"}</td>
-                  <td>${emp.contact_number || "-"}</td>
-                  <td>${formatDate(emp.dob)}</td>
-                  <td>${emp.address || "-"}</td>
-                  <td>${emp.email || "-"}</td>
-                  <td>${formatDate(emp.joining_date)}</td>
-                  <td>${emp.reporting_manager_id || "-"}</td>
-                  <td><button class="apro-edit-btn" onclick="alert('User story 2.6')">Edit</button></td>
-                </tr>
-              `;
+                   <tr>
+                     <td><img class="apro-profile-pic" src="${
+                       emp.profile_picture_url ||
+                       "/static/uploads/avatars/avatar1.png"
+                     }" alt="Profile" /></td>
+                     <td>${getName(emp.first_name, emp.last_name)}</td>
+                     <td>${emp.role || "-"}</td>
+                     <td>${emp.contact_number || "-"}</td>
+                     <td>${formatDate(emp.dob)}</td>
+                     <td>${emp.address || "-"}</td>
+                     <td>${emp.email || "-"}</td>
+                     <td>${formatDate(emp.joining_date)}</td>
+                    <td id="manager-${emp.id}">Loading...</td>
+                     <td><button class="apro-edit-btn" onclick='openEditModal(${JSON.stringify(
+                       emp
+                     )})'>Edit</button></td>
+
+                   </tr>
+                 `;
             tableBody.insertAdjacentHTML("beforeend", row);
+
+            if (emp.reporting_manager_id) {
+              getManagerNameById(emp.reporting_manager_id, token).then(
+                (managerName) => {
+                  document.getElementById(`manager-${emp.id}`).textContent =
+                    managerName;
+                }
+              );
+            } else {
+              document.getElementById(`manager-${emp.id}`).textContent = "-";
+            }
           }
         } catch (error) {
           console.error("Error loading employee data:", error);
           showErrorMessage("Could not load employee data");
+        }
+      }
+
+      function openEditModal(emp) {
+        editingUser = emp;
+
+        document.getElementById("editModal").style.display = "block";
+        document.getElementById("editName").value = `${emp.first_name || ""} ${
+          emp.last_name || ""
+        }`;
+        document.getElementById("editContact").value = emp.contact_number || "";
+        document.getElementById("editDOB").value = emp.dob
+          ? emp.dob.split("T")[0]
+          : "";
+        document.getElementById("editAddress").value = emp.address || "";
+        document.getElementById("editEmail").value = emp.email || "";
+      }
+
+      document
+        .getElementById("editForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          onSubmit();
+        });
+
+      function closeModal() {
+        document.getElementById("editModal").style.display = "none";
+      }
+
+      async function getManagerNameById(id, token) {
+        if (!id) return "-";
+        if (managerCache.has(id)) return managerCache.get(id); // return cached
+
+        try {
+          const res = await fetch(`${BASE_URL}/astrellect/v1/employees/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!res.ok) throw new Error("Manager fetch failed");
+
+          const data = await res.json();
+          const fullName = getName(data.first_name, data.last_name);
+          managerCache.set(id, fullName); // cache result
+          return fullName;
+        } catch (err) {
+          console.error(`Error fetching manager (${id}):`, err);
+          return "Unknown";
+        }
+      }
+
+      async function onSubmit() {
+        const token = localStorage.getItem("astrellect_token");
+        if (!token) {
+          alert("You must be logged in.");
+          return;
+        }
+
+        const fullName = document.getElementById("editName").value.trim();
+        const [first_name, ...last_name_parts] = fullName.split(" ");
+        const last_name = last_name_parts.join(" ") || "";
+        const dobValue = document.getElementById("editDOB").value.trim();
+        const dobISO = dobValue ? new Date(dobValue).toISOString() : null;
+
+        if (!editingUser.reporting_manager_id) {
+          alert(
+            "API doesnt allow to update employee without a Reporting Manager assigned."
+          );
+          return;
+        }
+
+        const body = {
+          email: document.getElementById("editEmail").value.trim(),
+          first_name,
+          last_name,
+          role: editingUser.role || "employee",
+          contact_number:
+            document.getElementById("editContact").value.trim() || "",
+          dob: dobISO,
+          address: document.getElementById("editAddress").value.trim(),
+          profile_picture_url: editingUser.profile_picture_url || "",
+          joining_date: editingUser.joining_date || new Date().toISOString(),
+          reporting_manager_id: editingUser.reporting_manager_id,
+          is_active:
+            editingUser.is_active !== undefined ? editingUser.is_active : true,
+          is_admin:
+            editingUser.is_admin !== undefined ? editingUser.is_admin : false,
+        };
+
+        console.log(body);
+        try {
+          const response = await fetch(
+            `${BASE_URL}/astrellect/v1/employees/update/${editingUser.id}`,
+            {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(body),
+            }
+          );
+
+          const result = await response.json();
+
+          if (!response.ok) throw new Error(result.detail || "Update failed");
+
+          alert("Employee updated successfully!");
+          closeModal();
+          loadEmployees();
+        } catch (error) {
+          console.error("Error updating employee:", error);
+          alert("Error updating employee");
         }
       }
     </script>
