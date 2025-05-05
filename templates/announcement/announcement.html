@@ -84,27 +84,17 @@
       function deleteAnmt(id) {
         fetch(`${baseUrl}/delete/${id}`, {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
         })
           .then((data) => {
-            console.log(`${action.toUpperCase()} SUCCESS:`, data);
+            console.log("DELETE SUCCESS:", data);
           })
           .catch((error) => {
-            console.error(`${action.toUpperCase()} ERROR:`, error);
+            console.error("DELETE ERROR:", error);
           });
       }
       function callAPI(action) {
         fetch(baseUrl, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body:
-            method === "POST" || method === "PUT"
-              ? JSON.stringify({ title: "Sample", body: "Sample body" })
-              : null,
+          method: action,
         })
           .then((response) => response.json())
           .then((data) => {
@@ -114,7 +104,7 @@
             console.error(`${action.toUpperCase()} ERROR:`, error);
           });
       }
-      
     </script>
   </body>
 </html>
+

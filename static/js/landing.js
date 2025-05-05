@@ -48,8 +48,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Store token in localStorage
                 localStorage.setItem('token', data.access_token);
                 
-                // Redirect to dashboard
-                window.location.href = '/dashboard';
+                // Get user role and redirect accordingly
+                const userRole = data.role || 'employee'; // Default to employee if role not provided
+                localStorage.setItem('userRole', userRole);
+                
+                // Redirect based on user role
+                switch(userRole.toLowerCase()) {
+                    case 'admin':
+                        window.location.href = '/admin/dashboard';
+                        break;
+                    case 'manager':
+                        window.location.href = '/manager/dashboard';
+                        break;
+                    case 'employee':
+                    default:
+                        window.location.href = '/employee/dashboard';
+                        break;
+                }
             } else {
                 alert('Login failed: ' + (data.detail || 'Invalid credentials'));
             }

@@ -1,13 +1,41 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Load user data and dashboard stats
+    // Check if user is authenticated
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.log("No token found on dashboard page, redirecting to login");
+        window.location.href = "/login";
+        return;
+    }
+    
+    console.log("Dashboard initialized with valid token");
+    
+    // Set up event listeners for navigation links to prevent default behavior
+    document.querySelectorAll('.nav-link:not(.logout)').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Check if the href is just "#" or "/" which would redirect to the landing page
+            if (this.getAttribute('href') === '#' || this.getAttribute('href') === '/') {
+                e.preventDefault();
+                console.log("Prevented navigation to empty href or root path");
+            }
+        });
+    });
+    
+    // Initialize dashboard components
+    initializeDashboard();
+});
+
+function initializeDashboard() {
+    // Fetch current user data
+    fetchCurrentUser();
+    // Fetch other necessary dashboard data
     loadUserData();
     loadDashboardStats();
     loadRecentAnnouncements();
     loadRecentTestimonials();
 
     // Setup event listeners
-    document.getElementById('logoutBtn').addEventListener('click', logoutUser);
-    
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+
     // Navigation handling
     document.querySelectorAll('.sidebar-nav a').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -16,7 +44,31 @@ document.addEventListener('DOMContentLoaded', function() {
             navigateToPage(page);
         });
     });
-});
+}
+
+function fetchCurrentUser() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    fetch('/astrellect/v1/employees/get-me', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch user data');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("User data retrieved successfully");
+        // Update UI with user data if needed
+    })
+    .catch(error => {
+        console.error('Error fetching user data:', error);
+    });
+}
 
 async function loadUserData() {
     try {
@@ -211,9 +263,12 @@ async function loadPageContent(page) {
     }
 }
 
-function logoutUser() {
+function logout() {
+    console.log("Logout triggered");
     localStorage.removeItem('token');
-    window.location.href = '/';
+    localStorage.removeItem('tokenExpiry');
+    localStorage.removeItem('userRole');
+    window.location.href = "/login";
 }
 
 function showToast(message, type = 'success') {

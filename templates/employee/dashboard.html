@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard - Synvotra</title>
+    <link rel="stylesheet" href="../../static/css/styles.css">
+    <link rel="stylesheet" href="../../static/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="../../static/assets/logo.png" alt="Synvotra Logo">
+                <h2>Synvotra</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active"><a href="./dashboard.html" data-page="dashboard"><i class="icon-dashboard"></i> Dashboard</a></li>
+                    <li><a href="./profile.html" data-page="profile"><i class="icon-profile"></i> My Profile</a></li>
+                    <li><a href="./trutime.html" data-page="trutime"><i class="icon-time"></i> TruTime</a></li>
+                    <li><a href="./attendance.html" data-page="attendance"><i class="icon-attendance"></i> Attendance</a></li>
+                    <li><a href="./leave.html" data-page="leave"><i class="icon-leave"></i> Leave</a></li>
+                    <li><a href="./referral.html" data-page="referral"><i class="icon-referral"></i> Referrals</a></li>
+                    <li><a href="./performance.html" data-page="performance"><i class="icon-performance"></i> Performance</a></li>
+                    <li><a href="./calendar.html" data-page="calendar"><i class="icon-calendar"></i> Calendar</a></li>
+                    <li><a href="./support.html" data-page="support"><i class="icon-support"></i> Support</a></li>
+                    <li><a href="./info-hub.html" data-page="info-hub"><i class="icon-info"></i> Info Hub</a></li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <header class="main-header">
+                <div class="search-bar">
+                    <input type="text" placeholder="Global Search...">
+                    <button><i class="icon-search"></i></button>
+                </div>
+                <div class="user-actions">
+                    <div class="notifications dropdown">
+                        <span class="notification-count">3</span>
+                        <i class="icon-notification"></i>
+                        <div class="dropdown-content">
+                            <p>You have 3 unread notifications</p>
+                        </div>
+                    </div>
+                    <div class="user-profile dropdown">
+                        <img src="../../static/uploads/avatars/avatar1.png" alt="User Profile">
+                        <span class="user-name" id="userName">Employee Name</span>
+                        <div class="dropdown-content">
+                            <a href="./profile.html">View Profile</a>
+                            <a href="#" onclick="logout()">Logout</a>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </header>
+            
+            <div class="dashboard-content">
+                <h1>Employee Dashboard</h1>
+                <div class="dashboard-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon attendance-icon"></div>
+                        <div class="summary-info">
+                            <h3>Today's Attendance</h3>
+                            <p>Check-in: 9:00 AM</p>
+                            <p>Status: Present</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon leave-icon"></div>
+                        <div class="summary-info">
+                            <h3>Leave Balance</h3>
+                            <p>Casual: 5 days</p>
+                            <p>Sick: 8 days</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon performance-icon"></div>
+                        <div class="summary-info">
+                            <h3>Performance</h3>
+                            <p>Last rating: 4.5/5</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recent-activities">
+                    <h2>Recent Activities</h2>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-date">May 15</div>
+                            <div class="activity-details">
+                                <h4>Leave Approved</h4>
+                                <p>Your leave request for May 20-22 has been approved by the manager.</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-date">May 12</div>
+                            <div class="activity-details">
+                                <h4>Performance Review Scheduled</h4>
+                                <p>Your quarterly performance review is scheduled for May 25, 10:00 AM.</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-date">May 10</div>
+                            <div class="activity-details">
+                                <h4>Profile Updated</h4>
+                                <p>Your contact information was updated successfully.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="upcoming-events">
+                    <h2>Upcoming Events</h2>
+                    <div class="event-list">
+                        <div class="event-item">
+                            <div class="event-date">
+                                <span class="date">25</span>
+                                <span class="month">May</span>
+                            </div>
+                            <div class="event-details">
+                                <h4>Performance Review</h4>
+                                <p>10:00 AM - 11:00 AM | Conference Room B</p>
+                            </div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-date">
+                                <span class="date">30</span>
+                                <span class="month">May</span>
+                            </div>
+                            <div class="event-details">
+                                <h4>Team Building Event</h4>
+                                <p>2:00 PM - 5:00 PM | Recreation Area</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../../static/js/auth.js"></script>
+    <script src="../../static/js/dashboard.js"></script>
+    <script src="/static/js/redirect-debug.js"></script>
+    <script src="/static/js/navigation-handler.js"></script>
+</body>
+</html>

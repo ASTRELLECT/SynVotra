@@ -1,0 +1,51 @@
+.login-container {
+    max-width: 450px;
+    margin: 100px auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.logo {
+    text-align: center;
+    padding: 30px 0;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.logo img {
+    max-width: 100px;
+    margin-bottom: 10px;
+}
+
+.login-form {
+    padding: 30px;
+}
+
+.login-form h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--dark-color);
+}
+
+.error-message {
+    color: var(--danger-color);
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    min-height: 20px;
+}
+
+.forgot-password {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.forgot-password a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.forgot-password a:hover {
+    text-decoration: underline;
+}
