@@ -4,7 +4,6 @@ from datetime import datetime
 from src.database.models import UserRole
 from enum import Enum
 import uuid
-from src.resources.constants import AVATARS_1, AVATARS_2
 
     
 class UserResponse(BaseModel):
@@ -73,19 +72,5 @@ class UserAttribute(BaseModel):
     is_active: Optional[bool] = None
     is_admin: Optional[bool] = None
 
-
-class AvatarType(Enum):
-    AVATAR_1 = "avatar1"
-    AVATAR_2 = "avatar2"
-
-    @validator("avatar_type")
-    def validate_avatar_type(cls, v):
-        if v not in [AvatarType.AVATAR_1, AvatarType.AVATAR_2]:
-            raise ValueError("Invalid avatar type")
-        if v == "avatar1":
-            return AVATARS_1
-        elif v == "avatar2":
-            return AVATARS_2
-
 class AvatarUpdate(BaseModel):
-    avatar_type: AvatarType
+    avatar_id: int

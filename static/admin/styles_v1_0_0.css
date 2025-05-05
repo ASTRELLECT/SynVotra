@@ -56,6 +56,22 @@ body {
   padding: 30px;
   background-color: #ecf0f1;
 }
+.apro-topbar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  align-content: center;
+}
+
+.apro-btn {
+  padding: 10px;
+  border-radius: 5px;
+  background: #000;
+  color: #ffffff;
+  cursor: pointer;
+}
 
 .apro-content h1 {
   margin-bottom: 20px;
@@ -106,4 +122,39 @@ body {
 
 .apro-edit-btn:hover {
   background-color: #1f6391;
+}
+
+.apro-modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.apro-modal-content {
+  background-color: #fefefe;
+  margin: 7% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 400px;
+  border-radius: 8px;
+}
+.apro-close {
+  color: #000;
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+.apro-close:hover {
+  color: black;
+}
+.apro-modal-content input {
+  width: 100%;
+  padding: 10px;
+}
+form#editForm {
+  margin-top: 5px;
 }

@@ -33,20 +33,25 @@ async def get_all_policy(
     try:
         policy = db.query(CompanyPolicy).all()
         if not policy:
+            logger.warning("❌ No company policies found")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No company policies found"
             )
-        logger.info("Company policies retrieved successfully")
+        logger.info("✅ Company policies retrieved successfully")
         return AllCompanyPolicyResponseList(company_policies=policy)
+
+    except HTTPException as http_exc:
+        raise http_exc
+
     except Exception as e:
-        logger.error(f"Unexpected error retrieving users: {str(e)}")
+        logger.error(f"❌ Unexpected error retrieving policies: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            detail="An unexpected error occurred while retrieving policies."
         )
 
-@policy_router.post("/create_new_policy",status_code=status.HTTP_201_CREATED)
+@policy_router.post("/create_new_policy", status_code=status.HTTP_201_CREATED)
 async def create_policy(
     policy: CompanyPolicyCreate,
     db: Session = Depends(get_db),
@@ -60,10 +65,10 @@ async def create_policy(
     try:
         existing_policy = db.query(CompanyPolicy).filter(CompanyPolicy.title == policy.title).first()
         if existing_policy:
-            logger.warning(f"Policy title conflict: {policy.title}")
+            logger.warning(f"🚫 Policy title conflict: {policy.title}")
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Policy with this title already exists"
+                detail="Policy with this title already exists."
             )
 
         policy_data = policy.model_dump()
@@ -78,15 +83,18 @@ async def create_policy(
         db.add(new_policy)
         db.commit()
         db.refresh(new_policy)
-        logger.info("✅ Company policy created successfully")
-        return {"message": "Company policy created successfully", "id": new_policy.id}
+        logger.info("✅ Company policy created successfully.")
+        return {"message": "Company policy created successfully.", "id": new_policy.id}
+
+    except HTTPException as http_exc:
+        raise http_exc
 
     except Exception as e:
         db.rollback()
-        logger.error(f"Error creating policy: {str(e)}", exc_info=True)
+        logger.error(f"❌ Error creating policy: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create policy"
+            detail="Failed to create policy."
         )
 
 @policy_router.put("/edit_policy/{policy_id}")
@@ -106,41 +114,46 @@ async def update_policy(
     try:
         db_policy = db.query(CompanyPolicy).filter(CompanyPolicy.id == policy_id).first()
         if not db_policy:
+            logger.warning(f"🚫 Policy not found for id: {policy_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Policy not found"
+                detail="Policy not found."
             )
 
         if policy_update.title:
             existing_policy = db.query(CompanyPolicy).filter(
-                CompanyPolicy.title == db_policy.title,
+                CompanyPolicy.title == policy_update.title,
                 CompanyPolicy.id != policy_id
-                ).first()
+            ).first()
             if existing_policy:
+                logger.warning(f"🚫 Title conflict when updating policy id: {policy_id}")
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail="Policy with this title already exists"
+                    detail="Policy with this title already exists."
                 )
 
         update_data = policy_update.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_policy, field, value)
-        
+
         db_policy.updated_at = datetime.utcnow()
         db.commit()
         db.refresh(db_policy)
-        logger.info("✅ Company policy updated successfully")
-        return {"message": "Company policy updated successfully"}
+        logger.info("✅ Company policy updated successfully.")
+        return {"message": "Company policy updated successfully."}
+
+    except HTTPException as http_exc:
+        raise http_exc
+
     except Exception as e:
         db.rollback()
-        logger.error(f"Error updating policy: {str(e)}", exc_info=True)
+        logger.error(f"❌ Error updating policy: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update policy"
+            detail="Failed to update policy."
         )
 
-
-@policy_router.delete("/delete_policy/{policy_id}", status_code=status.HTTP_204_NO_CONTENT)
+@policy_router.delete("/delete_policy/{policy_id}")
 async def delete_policy(
     policy_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -156,18 +169,24 @@ async def delete_policy(
     try:
         db_policy = db.query(CompanyPolicy).filter(CompanyPolicy.id == policy_id).first()
         if not db_policy:
+            logger.warning(f"🚫 Policy not found for deletion, id: {policy_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Policy not found"
+                detail="Policy not found."
             )
+
         db.delete(db_policy)
         db.commit()
-        logger.info("✅ Company policy deleted successfully")
-        return {"message": "Company policy deleted successfully"}
+        logger.info("✅ Company policy deleted successfully.")
+        return {"message": "Company policy deleted successfully."}
+
+    except HTTPException as http_exc:
+        raise http_exc
+
     except Exception as e:
         db.rollback()
-        logger.error(f"Error deleting policy: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete policy"
-        )
+        logger.error(f"❌ Error deleting policy: {str(e)}", exc_info=True)
+        return {
+            "detail": "Failed to delete policy.",
+            "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR
+        }
