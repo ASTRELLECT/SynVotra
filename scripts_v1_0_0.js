@@ -1,14 +1,19 @@
+
 const userId = localStorage.getItem("user_id");
+const token = localStorage.getItem("access_token"); 
+
 
 function enableEdit() {
   document.getElementById('verify-section').classList.remove('hidden');
 }
+
 
 function sendCode() {
   const newNumber = document.getElementById('new-number').value.trim();
   if (!newNumber) return alert("Enter a new number");
   alert(`Verification code sent to ${newNumber}`);
 }
+
 
 function submitContactUpdate() {
   const code = document.getElementById('code-input').value.trim();
@@ -23,25 +28,30 @@ function submitContactUpdate() {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      
+      "Authorization": `Bearer ${token}` 
     },
     body: JSON.stringify({ phone: newNumber })
   })
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) throw new Error("Update failed");
+    return res.json();
+  })
   .then(() => {
     document.getElementById('contact-number').value = newNumber;
     document.getElementById('verified-msg').style.display = "inline-block";
     document.getElementById('update-msg').innerText = "Number updated!";
   })
   .catch(err => {
-    console.error(err);
+    console.error("Contact update error:", err);
     alert("Failed to update number.");
   });
 }
 
+
 function resendCode() {
   alert("Verification code resent.");
 }
+
 
 function previewImage() {
   const file = document.getElementById('profile-upload').files[0];
@@ -64,10 +74,15 @@ function uploadProfilePicture() {
 
   fetch("/astrellect/v1/employees/update_profile_picture", {
     method: "PUT",
-    body: formData,
-    
+    headers: {
+      "Authorization": `Bearer ${token}`  
+    },
+    body: formData
   })
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) throw new Error("Upload failed");
+    return res.json();
+  })
   .then(data => {
     alert("Profile picture uploaded!");
     if (data.newImageUrl) {
@@ -79,7 +94,7 @@ function uploadProfilePicture() {
     }, 3000);
   })
   .catch(err => {
-    console.error(err);
+    console.error("Upload error:", err);
     alert("Upload failed.");
   });
 }
