@@ -158,3 +158,21 @@ body {
 form#editForm {
   margin-top: 5px;
 }
+.headerbox {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+}
+a.apro-back {
+  padding: 6px 15px;
+  border: 1px solid #000;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #000;
+  margin-right: 20px;
+  background: #ffffff;
+  font-size: 14px;
+}
