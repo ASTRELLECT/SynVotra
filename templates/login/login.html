@@ -309,8 +309,7 @@
         <div id="loggedInSection" class="hidden">
           <div class="login-status">
             <div>
-              You are successfully logged in <br />(This UI will be replaced by
-              dashboard)
+              You are successfully logged in <br />(Click on Logout to Logout Successfully.)
             </div>
             <br />
             <button class="btn btn-primary" onclick="logout()">Logout</button>
@@ -356,7 +355,6 @@
           showLoggedInState();
         }
       });
-
       // Handle login
       async function handleLogin() {
         const username = document.getElementById("username").value;
@@ -370,7 +368,7 @@
         try {
           const token = await login(username, password);
           showMessage("Login successful!", "success", loginMessageEl);
-          showLoggedInState();
+          window.location.href = "/home";
         } catch (error) {
           showMessage(
             "Login failed: " + error.message,
@@ -379,7 +377,6 @@
           );
         }
       }
-
       // Login function
       async function login(username, password) {
         const formData = new URLSearchParams();
