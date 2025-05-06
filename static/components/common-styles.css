@@ -53,7 +53,7 @@ body {
     margin-bottom: 10px;
     background-color: var(--white);
     border-radius: 50%;
-    padding: 5px;
+    /* padding: 5px; */
 }
 
 .sidebar-menu {

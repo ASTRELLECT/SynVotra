@@ -35,9 +35,9 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((response) => response.text())
       .then((data) => {
         headerContainer.innerHTML = data;
-
+        
         // Update user information in the header
-        updateUserInfo();
+        fetchData()
       })
       .catch((error) => console.error("Error loading header:", error));
   }
@@ -50,8 +50,32 @@ function getUserRole() {
   return "admin";
 }
 
+async function fetchData(){
+  const token = localStorage.getItem('astrellect_token');
+                
+  if (!token) {
+      console.error('No authentication token found');
+      showErrorMessage('Please log in to view your profile');
+      return;
+  }
+  const response = await fetch('/astrellect/v1/employees/get-me', {
+    method: 'GET',
+    headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    }
+});
+
+if (!response.ok) {
+    throw new Error('Failed to fetch user data');
+}
+
+const userData = await response.json();
+updateUserInfo(userData);
+}
+
 // Function to update user information in the header (placeholder)
-function updateUserInfo() {
+function updateUserInfo(userData) {
   // In a real application, this would update the user information from a session or API
   const userNameElement = document.querySelector(".user-name");
   const userRoleElement = document.querySelector(".user-role");
@@ -59,13 +83,13 @@ function updateUserInfo() {
 
   if (userNameElement && userRoleElement) {
     // Example of setting user data from a theoretical API or session
-    const userData = {
-      name: "John Smith",
-      role: "Software Engineer",
-      initials: "JS",
-    };
+    // const userData = {
+    //   name: "John Smith",
+    //   role: "Software Engineer",
+    //   initials: "JS",
+    // };
 
-    userNameElement.textContent = userData.name;
+    userNameElement.textContent = userData.first_name;
     userRoleElement.textContent = userData.role;
   }
 }
