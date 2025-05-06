@@ -4,149 +4,194 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Testimonials - SynVotra</title>
-    <link rel="stylesheet" href="static/css/common.css">
-    <link rel="stylesheet" href="static/css/testimonials.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/testimonials.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- Header will be dynamically loaded -->
-    <div id="header-placeholder"></div>
+    <div class="dashboard-container">
+        <!-- Sidebar matching dashboard -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>SynVotra</h2>
+            </div>
+            <nav>
+                <div class="menu-item" data-page="dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </div>
+                <div class="menu-item" data-page="profile">
+                    <i class="fas fa-user"></i> My Profile
+                </div>
+                <div class="menu-item" data-page="user_management">
+                    <i class="fas fa-users"></i> User Management
+                </div>
+                <div class="menu-item" data-page="announcement">
+                    <i class="fas fa-bullhorn"></i> Announcements
+                </div>
+                <div class="menu-item active" data-page="testimonials">
+                    <i class="fas fa-comments"></i>  Testimonials
+                </div>
+                <div class="menu-item" data-page="policies">
+                    <i class="fas fa-file-alt"></i> Policies
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </div>
+            </nav>
+        </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
-            <div class="page-header">
-                <h1>Testimonials</h1>
-                <p>What our employees have to say about working with us</p>
-                
-                <div class="header-actions">
-                    <div class="search-bar">
-                        <input type="text" id="testimonial-search" placeholder="Search testimonials...">
-                        <button class="btn btn-icon"><i class="fas fa-search"></i></button>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1><i class="fas fa-comments"></i> Testimonials</h1>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <img src="/static/uploads/avatars/avatar1.png" alt="User Avatar">
                     </div>
-                    
-                    <div class="filter-options">
+                    <span id="user-name">Admin User</span>
+                    <button class="logout-btn" id="logout-btn">Logout</button>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fas fa-star"></i> User Testimonials</h2>
+                    <button id="add-testimonial-btn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Testimonial
+                    </button>
+                </div>
+
+                <div class="action-bar">
+                    <div class="search-container">
+                        <input type="text" id="testimonial-search" placeholder="Search testimonials...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="filter-group">
+                        <select id="rating-filter">
+                            <option value="">All Ratings</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
                         <select id="status-filter" class="admin-only">
-                            <option value="all">All Statuses</option>
+                            <option value="">All Status</option>
+                            <option value="approved">Approved</option>
+                            <option value="pending">Pending</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="testimonial-grid" id="testimonial-container">
+                    <!-- Testimonials will be loaded here via JavaScript -->
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i> Loading testimonials...
+                    </div>
+                </div>
+                
+                <div class="pagination">
+                    <button id="prev-page" class="btn btn-outline" disabled>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <span id="page-info">Page 1 of 1</span>
+                    <button id="next-page" class="btn btn-outline">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Testimonial Modal -->
+    <div id="testimonial-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fas fa-comment-dots"></i> Add Your Testimonial</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="testimonial-form">
+                    <input type="hidden" id="testimonial-id">
+                    <div class="form-group">
+                        <label for="testimonial-title">Title*</label>
+                        <input type="text" id="testimonial-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Rating*</label>
+                        <div class="star-rating" id="rating-selector">
+                            <i class="fas fa-star" data-rating="1"></i>
+                            <i class="fas fa-star" data-rating="2"></i>
+                            <i class="fas fa-star" data-rating="3"></i>
+                            <i class="fas fa-star" data-rating="4"></i>
+                            <i class="fas fa-star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" id="testimonial-rating" value="5">
+                    </div>
+                    <div class="form-group admin-only" id="testimonial-status-container" style="display: none;">
+                        <label for="testimonial-status">Status</label>
+                        <select id="testimonial-status" class="form-control">
                             <option value="pending">Pending</option>
                             <option value="approved">Approved</option>
                             <option value="rejected">Rejected</option>
                         </select>
                     </div>
-                    
-                    <button id="add-testimonial-btn" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Add My Testimonial
-                    </button>
-                </div>
-            </div>
-
-            <!-- Testimonials listing -->
-            <div id="testimonials-container" class="testimonials-container">
-                <!-- Testimonials will be populated here -->
-                <div class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <p>Loading testimonials...</p>
-                </div>
-            </div>
-
-            <!-- Testimonial template for JavaScript -->
-            <template id="testimonial-template">
-                <div class="testimonial-card" data-id="">
-                    <div class="testimonial-content">
-                        <p class="testimonial-text"></p>
-                    </div>
-                    <div class="testimonial-footer">
-                        <div class="testimonial-meta">
-                            <span class="employee-name"></span>
-                            <span class="testimonial-date"></span>
-                            <span class="testimonial-status admin-view"></span>
-                        </div>
-                        <div class="testimonial-actions admin-only">
-                            <button class="btn btn-icon approve-btn" title="Approve testimonial">
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button class="btn btn-icon reject-btn" title="Reject testimonial">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <button class="btn btn-icon delete-btn" title="Delete testimonial">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </template>
-
-            <!-- Empty state template -->
-            <template id="empty-state-template">
-                <div class="empty-state">
-                    <i class="fas fa-comment-slash"></i>
-                    <h3>No testimonials found</h3>
-                    <p>There are no testimonials to display at the moment.</p>
-                </div>
-            </template>
-
-            <!-- Pagination -->
-            <div class="pagination-container">
-                <button id="prev-page" class="btn btn-secondary" disabled>
-                    <i class="fas fa-chevron-left"></i> Previous
-                </button>
-                <span id="page-info">Page 1 of 1</span>
-                <button id="next-page" class="btn btn-secondary" disabled>
-                    Next <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <!-- Testimonial Form Modal -->
-    <div id="testimonial-form-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="form-title">Add Your Testimonial</h2>
-                <span class="close-modal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="testimonial-form">
                     <div class="form-group">
-                        <label for="testimonial-text">Your Testimonial</label>
-                        <textarea id="testimonial-text" name="text" rows="5" required placeholder="Share your experience working with us..."></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                        <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                        <label for="testimonial-content">Your Feedback*</label>
+                        <textarea id="testimonial-content" rows="5" required></textarea>
                     </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                <button type="button" id="save-testimonial" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Moderation Modal -->
+    <div id="moderation-modal" class="modal admin-only">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-check-circle"></i> Review Testimonial</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="review-testimonial-content">
+                    <!-- Testimonial content will be displayed here -->
+                </div>
+                <div class="form-group">
+                    <label for="moderation-notes">Admin Notes (Optional)</label>
+                    <textarea id="moderation-notes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                <button type="button" id="reject-testimonial" class="btn btn-danger">Reject</button>
+                <button type="button" id="approve-testimonial" class="btn btn-primary">Approve</button>
             </div>
         </div>
     </div>
 
     <!-- Confirmation Modal -->
     <div id="confirm-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content modal-sm">
             <div class="modal-header">
-                <h2 id="confirm-title">Confirm Action</h2>
-                <span class="close-modal">&times;</span>
+                <h2>Confirm Action</h2>
+                <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <p id="confirm-message"></p>
-                <div class="form-actions">
-                    <button id="confirm-action" class="btn btn-danger">Confirm</button>
-                    <button class="btn btn-secondary close-modal">Cancel</button>
-                </div>
+                <p id="confirm-message">Are you sure you want to delete this testimonial?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                <button type="button" id="confirm-action" class="btn btn-danger">Delete</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast container for notifications -->
-    <div class="toast-container"></div>
-
-    <!-- Loading overlay -->
-    <div class="loading-overlay">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <script src="static/js/common.js"></script>
-    <script src="static/js/testimonials.js"></script>
+    <script src="/static/js/testimonials.js"></script>
 </body>
 </html>

@@ -574,8 +574,37 @@ function setupEventListeners() {
             // Load filtered announcements
             loadAnnouncements(option.dataset.filter);
         });
-    });
     
+    });
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const currentActive = document.querySelector('.menu-item.active');
+            if (currentActive) {
+                currentActive.classList.remove('active');
+            }
+            
+            this.classList.add('active');
+            
+            // Get text content to determine which page to navigate to
+            const menuText = this.textContent.trim().toLowerCase();
+            
+            if (menuText.includes('dashboard')) {
+                window.location.href = '/admin/dashboard';
+            } else if (menuText.includes('profile')) {
+                window.location.href = '/profile';
+            } else if (menuText.includes('user management')) {
+                window.location.href = '/user_management';
+            } else if (menuText.includes('testimonials')) {
+                window.location.href = '/testimonials';
+            } else if (menuText.includes('policies')) {
+                window.location.href = '/policies';
+            } else if (menuText.includes('announcements')) {
+                window.location.href = '/announcement';
+            } else if (menuText.includes('logout')) {
+                logout();
+            }
+        });
+    });
     // Logout button
     document.getElementById('logout-btn').addEventListener('click', logout);
     

@@ -72,7 +72,7 @@ async def get_testimonials(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred"
         )
-
+    
 @testimonials_router.get("/{testimonial_id}", response_model=TestimonialResponse)
 async def get_testimonial(
     testimonial_id: uuid.UUID,

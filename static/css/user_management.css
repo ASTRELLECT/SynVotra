@@ -20,7 +20,117 @@ body {
   color: #333;
   line-height: 1.6;
 }
+/* Edit User Modal Styles */
+#edit-user-modal .modal-content {
+  max-width: 600px;
+}
 
+/* Form styles */
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+}
+.dashboard-container {
+  display: flex;
+}
+.sidebar {
+  width: 250px;
+  background: #2c3e50;
+  color: white;
+  height: 100vh;
+  padding: 20px;
+}
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+.data-table th, .data-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+.btn {
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 5px;
+}
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+}
+.btn-danger {
+  background-color: #e74c3c;
+  color: white;
+}
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+}
+.close-modal {
+  float: right;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  color: white;
+  display: none;
+}
+.success { background-color: #2ecc71; }
+.error { background-color: #e74c3c; }
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  flex: 1;
+  padding-right: 80px;
+}
+
+.password-field button {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  padding: 0 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+#generate-password {
+  right: 40px;
+}
 .dashboard-container {
   display: flex;
   min-height: 100vh;
