@@ -144,7 +144,14 @@ def _get_app():
     @app.get("/employee-dashboard",response_class=HTMLResponse)
     async def employeeDash(request:Request):
         return templates.TemplateResponse('employee-profile/dashboard.html',{'request':request})
- 
+
+    @app.get("/testimonial", response_class=HTMLResponse)
+    async def testimonialDisplay(request: Request):
+        return templates.TemplateResponse('testimonial/testimonial-submit-view.html', {'request': request})
+    @app.get("/testimonial-admin-view", response_class=HTMLResponse)
+    async def testimonialAdminDisplay(request: Request):
+        return templates.TemplateResponse('testimonial/testimonial-approval-admin.html', {'request': request})
+
     return app
 
 if __name__ == "__main__":

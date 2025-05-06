@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin - Testimonials Management</title>
+
+  <!-- Common CSS -->
+  <link href="/static/components/common-styles.css" rel="stylesheet"/>
+  <link href="/static/dashboard/styles_v1_0_0.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    rel="stylesheet"
+  />
+  <script src="/static/common-script/components-loader.js"></script>
+
+  <style>
+    h2 { font-size:1.75rem; margin:2rem 0 1rem; }
+    .admin-card {
+      display:flex;justify-content:space-between;align-items:center;
+      background:#fff;border:1px solid var(--border);border-radius:1rem;
+      padding:1rem;margin-bottom:1rem;box-shadow:0 4px 10px rgba(0,0,0,0.05);
+    }
+    .admin-info { flex:1; }
+    .admin-info p { margin:0.25rem 0; }
+    .admin-actions button {
+      margin-left:0.5rem;padding:0.5rem 1rem;border:none;
+      border-radius:6px;cursor:pointer;
+    }
+    .approve-btn { background-color:var(--success);color:#fff; }
+    .reject-btn  { background-color:var(--danger); color:#fff; }
+    .no-items   { text-align:center;color:var(--dark-gray);padding:1rem; }
+    .error      { text-align:center;color:var(--danger);   padding:1rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <div id="header-container"></div>
+
+      <h2>🕒 Pending</h2>
+      <div id="pending-list"></div>
+
+      <h2>✅ Approved</h2>
+      <div id="approved-list"></div>
+
+      <h2>❌ Rejected</h2>
+      <div id="rejected-list"></div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const STATUS = {
+      PENDING:  'Pending',
+      APPROVED: 'Approved',
+      REJECTED: 'Rejected'
+    };
+    const API_T = `${window.location.origin}/astrellect/v1/testimonials`;
+    const API_U = `${window.location.origin}/astrellect/v1/employees/getall`;
+    const token = localStorage.getItem('astrellect_token');
+
+    const lists = {
+      Pending:  document.getElementById('pending-list'),
+      Approved: document.getElementById('approved-list'),
+      Rejected: document.getElementById('rejected-list')
+    };
+
+    document.addEventListener('DOMContentLoaded', init);
+
+    let userMap = {};
+
+    async function init(){
+      try {
+        // 1) fetch all users
+        const r1 = await fetch(API_U, { headers:{ Authorization:`Bearer ${token}` }});
+        if(!r1.ok) throw new Error('Could not load users');
+        const { result: users } = await r1.json();
+        users.forEach(u => { userMap[u.id] = u; });
+
+        // 2) then load testimonials
+        await loadTestimonials();
+      } catch(err) {
+        console.error(err);
+        Object.values(lists).forEach(el => 
+          el.innerHTML = `<div class="error">${err.message}</div>`
+        );
+      }
+    }
+
+    async function loadTestimonials() {
+      Object.values(lists).forEach(el => el.innerHTML = '');
+      try {
+        const r = await fetch(API_T, { headers:{ Authorization:`Bearer ${token}` }});
+        if(!r.ok) throw new Error(`Fetch failed (${r.status})`);
+        const { testimonials } = await r.json();
+
+        const buckets = { Pending:[], Approved:[], Rejected:[] };
+        testimonials.forEach(t => {
+          if(buckets[t.status]) buckets[t.status].push(t);
+        });
+
+        render('Pending',  buckets.Pending,  renderPendingCard);
+        render('Approved', buckets.Approved, renderApprovedCard);
+        render('Rejected', buckets.Rejected, renderRejectedCard);
+      } catch(err){
+        console.error(err);
+        Object.values(lists).forEach(el => 
+          el.innerHTML = `<div class="error">${err.message}</div>`
+        );
+      }
+    }
+
+    function render(status, items, renderer){
+      const ctr = lists[status];
+      if(!items.length){
+        ctr.innerHTML = `<div class="no-items">No testimonials here.</div>`;
+      } else {
+        items.forEach(t => ctr.appendChild(renderer(t)));
+      }
+      bindButtons();
+    }
+
+    function makeCard(t, actions){
+      const u = userMap[t.user_id] || {};
+      const name = u.first_name?'${u.first_name}':'Unknown';
+      const surname = u.last_name?' '+u.last_name:'';
+      const role = u.role||'';
+      const card = document.createElement('div');
+      card.className='admin-card';
+      const info = `
+        <div class="admin-info">
+          <p><strong>${u.first_name||'N/A'} ${u.last_name||''}</strong> <em>${role}</em></p>
+          <p>${t.content}</p>
+          <small>${new Date(t.created_at).toLocaleString()}</small>
+        </div>`;
+      const btns = actions.map(a=>
+        `<button class="${a.cls}" data-id="${t.id}" data-st="${a.status}">
+           ${a.text}
+         </button>`
+      ).join('');
+      card.innerHTML = info+`<div class="admin-actions">${btns}</div>`;
+      return card;
+    }
+
+    function renderPendingCard(t){
+      return makeCard(t, [
+        {text:'Approve',    cls:'approve-btn', status:STATUS.APPROVED},
+        {text:'Reject',     cls:'reject-btn',  status:STATUS.REJECTED}
+      ]);
+    }
+    function renderApprovedCard(t){
+      return makeCard(t, [
+        {text:'Mark Pending',cls:'approve-btn', status:STATUS.PENDING},
+        {text:'Reject',      cls:'reject-btn',  status:STATUS.REJECTED}
+      ]);
+    }
+    function renderRejectedCard(t){
+      return makeCard(t, [
+        {text:'Delete',      cls:'reject-btn',  status:'DELETE'}
+      ]);
+    }
+
+    function bindButtons(){
+      document.querySelectorAll('.admin-actions button')
+        .forEach(b=>{
+          b.onclick=()=>{
+            const id=b.dataset.id, st=b.dataset.st;
+            if(st==='DELETE') return deleteTestimonial(id);
+            updateStatus(id,st);
+          };
+        });
+    }
+
+    async function updateStatus(id,status){
+      try{
+        const r=await fetch(`${API_T}/${id}`,{
+          method:'PUT',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization':`Bearer ${token}`
+          },
+          body:JSON.stringify({status})
+        });
+        const body = await r.json().catch(()=>({}));
+        if(!r.ok) throw new Error(body.detail||r.statusText);
+        loadTestimonials();
+      }catch(e){
+        alert(`Update failed: ${e.message}`);
+      }
+    }
+
+    async function deleteTestimonial(id){
+      try{
+        const r=await fetch(`${API_T}/${id}`,{
+          method:'DELETE',
+          headers:{'Authorization':`Bearer ${token}`}
+        });
+        if(!r.ok){
+          const t=await r.text();
+          throw new Error(t||r.statusText);
+        }
+        loadTestimonials();
+      }catch(e){
+        alert(`Delete failed: ${e.message}`);
+      }
+    }
+  })();
+  </script>
+</body>
+</html>
