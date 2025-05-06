@@ -47,19 +47,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 const data = await response.json();
                 
-                // Store the token and user info in localStorage
+                // Store the token and user info
                 localStorage.setItem('access_token', data.access_token);
                 if (data.user_id) localStorage.setItem('user_id', data.user_id);
                 if (data.role) localStorage.setItem('user_role', data.role);
                 
-                // Also set as cookie for server-side access
+                // Set cookie for server-side access
                 document.cookie = `access_token=${data.access_token}; path=/; max-age=86400`;
                 
-                // Redirect to dashboard (the server will handle role-based redirection)
+                // Only redirect after successful login
                 window.location.href = '/dashboard';
-                
             } else {
-                // Handle login errors
                 const error = await response.json();
                 errorMsg.textContent = error.detail || 'Invalid username or password';
                 errorMsg.style.display = 'block';
@@ -87,17 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return errorElement;
     }
-    
-    // Check if user is already logged in
-    const token = localStorage.getItem('access_token') || getTokenFromCookie();
-    // Add this parameter to avoid redirect loops if there's a problem with the token
-    const redirectAttempt = new URLSearchParams(window.location.search).get('redirect');
-    
-    if (token && redirectAttempt !== 'failed') {
-        // Redirect to dashboard
-        window.location.href = '/dashboard?source=landing';
-    }
-    
     /**
      * Get token from cookie
      */
