@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Synvotra Employee Portal</title>
+      
+    <!-- Common CSS -->
+    <link href="/static/components/common-styles.css" rel="stylesheet">
+    
+    <!-- Dashboard-specific CSS -->
+    <link href="/static/dashboard/styles_v1_0_0.css" rel="stylesheet">
+    
+    <!-- Material Icons and Font Awesome -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+    <!-- Components Loader Script -->
+    <script src="/static/common-script/components-loader.js"></script>
+  <!-- Styles -->
+  <style>
+    /* Section Headings */
+    h2 {
+      font-size: 2rem;
+      margin: 2rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  
+    /* Testimonial Cards */
+    #testimonial-list, .testimonial-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .testimonial-card {
+      background: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .2s, box-shadow .2s;
+      padding: 13px;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .testimonial-info {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .testimonial-info h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .testimonial-info small {
+      color: var(--gray);
+      margin-bottom: 0.75rem;
+    }
+    .testimonial-info p {
+      flex: 1;
+      line-height: 1.5;
+      color: #333;
+    }
+    .testimonial-footer {
+      text-align: right;
+      padding: 0 1.5rem 1rem;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+  
+    /* Submission Form */
+    form#testimonial-form {
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      padding: 2rem;
+      margin: 2rem 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+    }
+    form#testimonial-form h3 {
+      grid-column: 1 / -1;
+      margin: 0 0 1rem;
+      font-size: 1.25rem;
+    }
+    form#testimonial-form textarea {
+      grid-column: 1 / -1;
+      resize: vertical;
+      min-height: 120px;
+      border: 1px solid;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      font-size: 1rem;
+      border-color: #ede7e7;
+    }
+    .form-buttons {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+    .form-buttons button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      transition: background .2s;
+    }
+    .form-buttons button[type="submit"] {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+    }
+    .form-buttons button[type="submit"]:hover {
+      background: var(--primary-light);
+    }
+    .form-buttons button#clear-btn {
+      background: var(--gray-light);
+      color: #333;
+      border: none;
+    }
+    .form-buttons button#clear-btn:hover {
+      background: rgb(207, 204, 204);
+      color: #0e0d0d;
+    }
+  
+    /* Empty & Error States */
+    .no-items, .empty-state, .error {
+      text-align: center;
+      color: var(--dark-gray);
+      padding: 2rem;
+      grid-column: 1 / -1;
+      background: #f9fafb;
+      border-radius: 0.75rem;
+    }
+  </style>
+  
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- Sidebar -->
+  <div id="sidebar-container"></div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    
+    <!-- Header -->
+    <div id="header-container"></div>
+    <br>
+    <!-- Testimonials -->
+    <h2>🌟 Employee Testimonials</h2>
+    <div id="testimonial-list"></div>
+
+    <form id="testimonial-form">
+      <h3 id="form-title">📝 Submit Your Testimonial</h3>
+      <textarea id="message" rows="4" placeholder="Your Message..." required></textarea>
+      <div class="form-buttons">
+        <button type="submit">Submit</button>
+        <button type="button" id="clear-btn">Clear</button>
+      </div>
+    </form>
+    <br>
+    <!-- Approved Testimonials List -->
+    <div id="testimonial-list"></div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async function() {
+      await fetchUserData();
+  });
+  async function fetchUserData() {
+      try {
+          // Get token from localStorage (you need to set this when user logs in)
+          const token = localStorage.getItem('astrellect_token');
+          
+          if (!token) {
+              console.error('No authentication token found');
+              showErrorMessage('Please log in to view your profile');
+              return;
+          }
+          
+          // Make API request to get user data
+          const response = await fetch('/astrellect/v1/employees/get-me', {
+              method: 'GET',
+              headers: {
+                  'Authorization': 'Bearer ' + token,
+                  'Content-Type': 'application/json'
+              }
+          });
+          
+          if (!response.ok) {
+              throw new Error('Failed to fetch user data');
+          }
+          
+          const userData = await response.json();
+          console.log(userData,'userData')
+          if (userData.reporting_manager_id) {
+              // Second API call - Get reporting manager details using the ID
+              // Add the authorization header here as well
+              const managerResponse = await fetch(`/astrellect/v1/employees/${userData.reporting_manager_id}`, {
+                  method: 'GET',
+                  headers: {
+                      'Authorization': 'Bearer ' + token,
+                      'Content-Type': 'application/json'
+                  }
+              });
+              
+              if (!managerResponse.ok) {
+                  throw new Error('Failed to fetch manager data');
+              }
+              
+              const managerInfo = await managerResponse.json();
+              userData.reporting_manager_name = managerInfo.first_name || 'Unknown';
+          } else {
+              userData.reporting_manager_name = 'None assigned';
+          }
+          updateProfileUI(userData);
+      } catch (error) {
+          console.error('Error fetching user data:', error);
+          showErrorMessage('Could not load profile data');
+      }
+  }
+  
+  // Function to update UI with user data
+  function updateProfileUI(userData) {
+      // Update header section
+      document.getElementById('headerName').textContent = userData.first_name || 'N/A';
+      document.getElementById('headerJobTitle').textContent = userData.role || 'N/A';
+      
+      // Update main profile info
+      document.getElementById('fullName').textContent = userData.first_name || 'N/A';
+      document.getElementById('jobTitle').textContent = userData.role || 'N/A';
+      document.getElementById('contactNumber').textContent = userData.contact_number || 'N/A';
+      document.getElementById('dob').textContent = formatDate(userData.dob) || 'N/A';
+      document.getElementById('address').textContent = userData.address || 'N/A';
+      document.getElementById('email').textContent = userData.email || 'N/A';
+      document.getElementById('joiningDate').textContent = formatDate(userData.joining_date) || 'N/A';
+      document.getElementById('manager').textContent = userData.reporting_manager_name || 'N/A';
+      
+      // Update photo if available
+      if (userData.profile_photo) {
+          document.getElementById('profilePhotoDisplay').src = userData.profile_photo;
+      }
+      
+      // Pre-fill the contact modal with current number
+      document.getElementById('newContactNumber').value = userData.contact_number || '';
+  }
+  
+  // Helper function to format dates
+  function formatDate(dateString) {
+      if (!dateString) return '';
+      
+      try {
+          const date = new Date(dateString);
+          
+          if (isNaN(date.getTime())) {
+              return dateString; // Return original if parsing fails
+          }
+          
+          const day = date.getDate();
+          const month = date.toLocaleString('default', { month: 'long' });
+          const year = date.getFullYear();
+          
+          return `${day} ${month} ${year}`;
+      } catch (error) {
+          console.error('Error formatting date:', error);
+          return dateString; // Return original on error
+      }
+  }
+  
+  // Function to display error messages
+  function showErrorMessage(message) {
+      // Update key elements to show error
+      document.getElementById('headerName').textContent = 'Error';
+      document.getElementById('headerJobTitle').textContent = message;
+      
+      // Update all values with error message
+      const infoValues = document.querySelectorAll('.info-value');
+      infoValues.forEach(el => {
+          if (!el.classList.contains('contact-edit-container')) {
+              el.textContent = 'Error loading data';
+          }
+      });
+      
+      document.getElementById('contactNumber').textContent = 'Error loading data';
+  }
+  
+  // Function to open and close edit contact number modal
+  function showContactModal() {
+      document.getElementById('contactModal').style.display = 'block';
+  }
+  
+  function closeContactModal() {
+      document.getElementById('contactModal').style.display = 'none';
+  }
+  
+  function updateContactNumber() {
+      const newNumber = document.getElementById('newContactNumber').value;
+      document.getElementById('contactNumber').textContent = newNumber;
+      closeContactModal();
+  }
+  
+    const form = document.getElementById('testimonial-form');
+    const messageInput = document.getElementById('message');
+    const clearBtn = document.getElementById('clear-btn');
+    const formTitle = document.getElementById('form-title');
+    const previewImg = document.getElementById('preview-img');
+    const testimonialList = document.getElementById('testimonial-list');
+    
+    const BASE_URL = "http://127.0.0.1:8000";
+    const API_BASE = `${BASE_URL}/astrellect/v1/testimonials`;
+    const token = localStorage.getItem('astrellect_token');
+    const userNameElement = document.getElementById('user-name');
+  const userRoleElement = document.getElementById('user-role');
+  const userAvatarElement = document.getElementById('user-avatar');
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message) return;
+  
+      try {
+        const response = await fetch(`${API_BASE}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ content: message })
+        });
+  
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || 'Failed to submit testimonial');
+        }
+  
+        alert('✅ Testimonial submitted successfully!');
+        form.reset();
+        if (previewImg) previewImg.style.display = 'none';
+        formTitle.textContent = "📝 Submit Your Testimonial";
+
+      } catch (error) {
+        alert(`❌ Error: ${error.message}`);
+      }
+    });
+
+    clearBtn.addEventListener('click', function () {
+      form.reset();
+      if (previewImg) previewImg.style.display = 'none';
+      formTitle.textContent = "📝 Submit Your Testimonial";
+    });
+</script>
+<script>
+  (function() {
+    const API_T = `${window.location.origin}/astrellect/v1/testimonials`;
+    const token = localStorage.getItem('astrellect_token');
+    const listEl = document.getElementById('testimonial-list');
+    if (!listEl) return;
+
+    document.addEventListener('DOMContentLoaded', loadApprovedTestimonials);
+
+    async function loadApprovedTestimonials() {
+      listEl.innerHTML = '';
+      try {
+        const res = await fetch(API_T, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        // If backend returns 404 for "no testimonials", treat as empty list
+        if (res.status === 404) {
+          listEl.innerHTML = '<p class="empty-state">No testimonials to display.</p>';
+          return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to load (${res.status})`);
+        const { testimonials } = await res.json();
+
+        const approved = Array.isArray(testimonials)
+          ? testimonials.filter(t => t.status === 'Approved')
+          : [];
+
+        if (approved.length === 0) {
+          listEl.innerHTML = '<p class="empty-state">No testimonials to display.</p>';
+          return;
+        }
+
+        approved.forEach(t => {
+          const date = new Date(t.created_at).toLocaleDateString();
+          const card = document.createElement('div');
+          card.className = 'testimonial-card';
+          card.innerHTML = `
+            <div class="testimonial-header">
+              <div class="testimonial-author">
+                <h4>${t.user_first_name || 'Anonymous'}</h4>
+                <small>${date}</small>
+              </div>
+            </div>
+            <div class="testimonial-content">${t.content}</div>
+          `;
+          listEl.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error(err);
+        listEl.innerHTML = `<p class="error">Error loading testimonials: ${err.message}</p>`;
+      }
+    }
+  })();
+</script>
+</body>
+</html>
