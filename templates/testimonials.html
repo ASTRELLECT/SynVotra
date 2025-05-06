@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testimonials - SynVotra</title>
+    <link rel="stylesheet" href="static/css/common.css">
+    <link rel="stylesheet" href="static/css/testimonials.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header will be dynamically loaded -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Testimonials</h1>
+                <p>What our employees have to say about working with us</p>
+                
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="text" id="testimonial-search" placeholder="Search testimonials...">
+                        <button class="btn btn-icon"><i class="fas fa-search"></i></button>
+                    </div>
+                    
+                    <div class="filter-options">
+                        <select id="status-filter" class="admin-only">
+                            <option value="all">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    
+                    <button id="add-testimonial-btn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add My Testimonial
+                    </button>
+                </div>
+            </div>
+
+            <!-- Testimonials listing -->
+            <div id="testimonials-container" class="testimonials-container">
+                <!-- Testimonials will be populated here -->
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Loading testimonials...</p>
+                </div>
+            </div>
+
+            <!-- Testimonial template for JavaScript -->
+            <template id="testimonial-template">
+                <div class="testimonial-card" data-id="">
+                    <div class="testimonial-content">
+                        <p class="testimonial-text"></p>
+                    </div>
+                    <div class="testimonial-footer">
+                        <div class="testimonial-meta">
+                            <span class="employee-name"></span>
+                            <span class="testimonial-date"></span>
+                            <span class="testimonial-status admin-view"></span>
+                        </div>
+                        <div class="testimonial-actions admin-only">
+                            <button class="btn btn-icon approve-btn" title="Approve testimonial">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-icon reject-btn" title="Reject testimonial">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <button class="btn btn-icon delete-btn" title="Delete testimonial">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Empty state template -->
+            <template id="empty-state-template">
+                <div class="empty-state">
+                    <i class="fas fa-comment-slash"></i>
+                    <h3>No testimonials found</h3>
+                    <p>There are no testimonials to display at the moment.</p>
+                </div>
+            </template>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <button id="prev-page" class="btn btn-secondary" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span id="page-info">Page 1 of 1</span>
+                <button id="next-page" class="btn btn-secondary" disabled>
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Testimonial Form Modal -->
+    <div id="testimonial-form-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="form-title">Add Your Testimonial</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="testimonial-form">
+                    <div class="form-group">
+                        <label for="testimonial-text">Your Testimonial</label>
+                        <textarea id="testimonial-text" name="text" rows="5" required placeholder="Share your experience working with us..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="confirm-title">Confirm Action</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message"></p>
+                <div class="form-actions">
+                    <button id="confirm-action" class="btn btn-danger">Confirm</button>
+                    <button class="btn btn-secondary close-modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container for notifications -->
+    <div class="toast-container"></div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script src="static/js/common.js"></script>
+    <script src="static/js/testimonials.js"></script>
+</body>
+</html>

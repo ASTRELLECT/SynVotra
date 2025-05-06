@@ -38,6 +38,39 @@ async def get_current_user_info(
     """
     return current_user
 
+@users_router.get("/statistics", response_model=dict)
+async def get_employee_statistics(current_user: User = Depends(get_current_user)):
+    """
+    Retrieve statistics about employees in the system.
+    Only accessible by admins and managers.
+    """
+    if current_user.role not in ["admin", "manager"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Permission denied. Only admins and managers can access employee statistics."
+        )
+    
+    try:
+        # Get counts by role
+        total_count = await User.filter().count()
+        employee_count = await User.filter(role="employee").count()
+        manager_count = await User.filter(role="manager").count()
+        admin_count = await User.filter(role="admin").count()
+        
+        # Return statistics
+        return {
+            "total": total_count,
+            "employees": employee_count,
+            "managers": manager_count,
+            "admins": admin_count
+        }
+    except Exception as e:
+        logger.error(f"Error getting employee statistics: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to retrieve employee statistics"
+        )
+    
 @users_router.get("/getall", response_model=UserListResponse)
 async def get_all_users(
     db: Session = Depends(get_db),

@@ -1,34 +1,39 @@
-// landing.js
+/**
+ * Landing Page JavaScript
+ * Handles landing page functionality and login modal
+ */
+
 document.addEventListener('DOMContentLoaded', function() {
     // Modal functionality
-    const loginBtn = document.getElementById('loginBtn');
-    const loginModal = document.getElementById('loginModal');
-    const closeBtn = document.querySelector('.close');
-    const loginForm = document.getElementById('loginForm');
-
+    const modal = document.getElementById("loginModal");
+    const loginBtn = document.getElementById("loginBtn");
+    const closeBtn = document.querySelector(".close");
+    const loginForm = document.getElementById("loginForm");
+    
     // Open modal when login button is clicked
-    loginBtn.addEventListener('click', function() {
-        loginModal.style.display = 'block';
+    loginBtn.addEventListener("click", function() {
+        modal.style.display = "block";
     });
-
+    
     // Close modal when X is clicked
-    closeBtn.addEventListener('click', function() {
-        loginModal.style.display = 'none';
+    closeBtn.addEventListener("click", function() {
+        modal.style.display = "none";
     });
-
+    
     // Close modal when clicking outside of it
-    window.addEventListener('click', function(event) {
-        if (event.target === loginModal) {
-            loginModal.style.display = 'none';
+    window.addEventListener("click", function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
         }
     });
-
+    
     // Handle login form submission
-    loginForm.addEventListener('submit', async function(e) {
+    loginForm.addEventListener("submit", async function(e) {
         e.preventDefault();
         
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const errorMsg = document.getElementById("login-error") || createErrorElement();
         
         try {
             const response = await fetch('/astrellect/v1/auth/token', {
@@ -36,58 +41,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams({
-                    'username': username,
-                    'password': password,
-                }),
+                body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
             });
             
-            const data = await response.json();
-            
             if (response.ok) {
-                // Store token in localStorage
-                localStorage.setItem('token', data.access_token);
+                const data = await response.json();
                 
-                // Get user role and redirect accordingly
-                const userRole = data.role || 'employee'; // Default to employee if role not provided
-                localStorage.setItem('userRole', userRole);
+                // Store the token and user info in localStorage
+                localStorage.setItem('access_token', data.access_token);
+                if (data.user_id) localStorage.setItem('user_id', data.user_id);
+                if (data.role) localStorage.setItem('user_role', data.role);
                 
-                // Redirect based on user role
-                switch(userRole.toLowerCase()) {
-                    case 'admin':
-                        window.location.href = '/admin/dashboard';
-                        break;
-                    case 'manager':
-                        window.location.href = '/manager/dashboard';
-                        break;
-                    case 'employee':
-                    default:
-                        window.location.href = '/employee/dashboard';
-                        break;
-                }
+                // Also set as cookie for server-side access
+                document.cookie = `access_token=${data.access_token}; path=/; max-age=86400`;
+                
+                // Redirect to dashboard (the server will handle role-based redirection)
+                window.location.href = '/dashboard';
+                
             } else {
-                alert('Login failed: ' + (data.detail || 'Invalid credentials'));
+                // Handle login errors
+                const error = await response.json();
+                errorMsg.textContent = error.detail || 'Invalid username or password';
+                errorMsg.style.display = 'block';
             }
         } catch (error) {
-            console.error('Error during login:', error);
-            alert('Login failed. Please try again.');
+            console.error('Login error:', error);
+            errorMsg.textContent = 'An error occurred during login. Please try again.';
+            errorMsg.style.display = 'block';
         }
     });
-
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 100,
-                    behavior: 'smooth'
-                });
+    
+    /**
+     * Create error message element if it doesn't exist
+     */
+    function createErrorElement() {
+        const errorElement = document.createElement('div');
+        errorElement.id = 'login-error';
+        errorElement.style.color = '#e74c3c';
+        errorElement.style.marginTop = '10px';
+        errorElement.style.fontSize = '14px';
+        
+        // Insert after the login button
+        const loginButton = document.querySelector('.login-submit-btn');
+        loginButton.parentNode.insertBefore(errorElement, loginButton.nextSibling);
+        
+        return errorElement;
+    }
+    
+    // Check if user is already logged in
+    const token = localStorage.getItem('access_token') || getTokenFromCookie();
+    // Add this parameter to avoid redirect loops if there's a problem with the token
+    const redirectAttempt = new URLSearchParams(window.location.search).get('redirect');
+    
+    if (token && redirectAttempt !== 'failed') {
+        // Redirect to dashboard
+        window.location.href = '/dashboard?source=landing';
+    }
+    
+    /**
+     * Get token from cookie
+     */
+    function getTokenFromCookie() {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'access_token') {
+                return value;
             }
-        });
-    });
+        }
+        return null;
+    }
 });

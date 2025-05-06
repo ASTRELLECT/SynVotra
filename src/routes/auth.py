@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+from jose import jwt
+import logging
 
 from src.database import get_db
 from src.auth.auth import Token, authenticate_user, create_access_token, get_current_user
@@ -13,6 +15,8 @@ auth_router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
 )
+
+logger = logging.getLogger(__name__)
 
 @auth_router.post("/token", response_model=Token)
 async def login_for_access_token(
@@ -34,16 +38,28 @@ async def login_for_access_token(
     db.commit()
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    # Include role in token data
+    token_data = {
+        "sub": str(user.id),
+        "email": user.email,
+        "role": user.role.value if user.role else None,
+        "is_admin": user.is_admin
+    }
+    
     access_token = create_access_token(
-        data={
-            "sub": str(user.id),
-            "email": user.email,
-            "role": user.role.value if user.role else None,
-            "is_admin": user.is_admin
-        }, 
+        data=token_data, 
         expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    logger.info(f"User {user.email} logged in successfully")
+    
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user_id": str(user.id),
+        "role": user.role.value if user.role else None
+    }
 
 @auth_router.post("/change-password", status_code=status.HTTP_200_OK)
 async def change_password(

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements - SynVotra</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/announcement.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>SynVotra</h2>
+            </div>
+            <nav>
+                <div class="menu-item" data-page="dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </div>
+                <div class="menu-item" data-page="profile">
+                    <i class="fas fa-user"></i> My Profile
+                </div>
+                <div id="user-management-menu" class="menu-item">
+                    <i class="fas fa-users"></i> User Management
+                </div>
+                <div class="menu-item active">
+                    <i class="fas fa-bullhorn"></i> Announcements
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-comments"></i> Testimonials
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-file-alt"></i> Policies
+                </div>
+                <div class="menu-item" id="logout-menu">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h1>Announcements</h1>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <img id="header-avatar-img" src="/static/uploads/avatars/default.png" alt="User Avatar">
+                    </div>
+                    <span id="header-user-name">User Name</span>
+                    <button class="logout-btn" id="logout-btn">Logout</button>
+                </div>
+            </div>
+
+            <div class="announcements-header">
+                <h2>All Announcements</h2>
+                <button class="action-button" id="create-announcement-btn">
+                    <i class="fas fa-plus"></i> Create Announcement
+                </button>
+            </div>
+
+            <div class="announcement-filter">
+                <div class="filter-option active" data-filter="all">All</div>
+            </div>
+
+            <div class="announcements-container" id="announcements-container">
+                <!-- Announcements will be loaded here -->
+            </div>
+
+            <!-- Create/Edit Announcement Modal -->
+            <div id="announcementModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2 class="modal-title" id="modal-title">Create Announcement</h2>
+                    <form id="announcement-form">
+                        <input type="hidden" id="announcement-id">
+                        <div class="form-group">
+                            <label for="announcement-title">Title*</label>
+                            <input type="text" id="announcement-title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="announcement-content">Content*</label>
+                            <textarea id="announcement-content" name="content" required></textarea>
+                        </div>
+                        <div class="form-group" id="recipients-group">
+                            <label for="announcement-recipients">Recipients*</label>
+                            <select id="announcement-recipients" name="recipients" multiple>
+                                <option value="all" selected>All Users</option>
+                                <option value="admin">Admins Only</option>
+                                <option value="manager">Managers Only</option>
+                                <option value="employee">Employees Only</option>
+                            </select>
+                            <small>Hold Ctrl (or Cmd) to select multiple options</small>
+                        </div>
+                        <div class="date-range-container">
+                            <div class="form-group">
+                                <label for="start-date">Start Date</label>
+                                <input type="date" id="start-date" name="start_date">
+                            </div>
+                            <div class="form-group">
+                                <label for="end-date">End Date</label>
+                                <input type="date" id="end-date" name="end_date">
+                            </div>
+                        </div>
+                        <div id="form-error" style="color: red; margin-bottom: 10px; display: none;"></div>
+                        <div class="form-actions">
+                            <button type="button" class="action-button" id="cancel-announcement-btn" style="background-color: #95a5a6;">Cancel</button>
+                            <button type="submit" class="action-button">Publish Announcement</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- View Announcement Modal -->
+            <div id="viewAnnouncementModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2 class="modal-title" id="view-announcement-title"></h2>
+                    <div class="announcement-meta">
+                        <div class="announcement-author">
+                            <i class="fas fa-user"></i>
+                            <span id="view-announcement-author"></span>
+                        </div>
+                        <div class="announcement-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span id="view-announcement-date"></span>
+                        </div>
+                    </div>
+                    <div class="announcement-content" id="view-announcement-content"></div>
+                    <div class="form-actions">
+                        <button type="button" class="action-button" id="close-view-btn">Close</button>
+                        <button type="button" class="action-button" id="mark-read-btn">Mark as Read</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirmation Modal -->
+            <div id="confirmationModal" class="modal">
+                <div class="modal-content" style="max-width: 400px;">
+                    <span class="close" id="close-confirmation">&times;</span>
+                    <h2 class="modal-title">Confirm Delete</h2>
+                    <p>Are you sure you want to delete this announcement? This action cannot be undone.</p>
+                    <div class="form-actions">
+                        <button type="button" class="action-button" id="cancel-delete-btn" style="background-color: #95a5a6;">Cancel</button>
+                        <button type="button" class="action-button" id="confirm-delete-btn" style="background-color: #e74c3c;">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/announcement.js"></script>
+</body>
+</html>

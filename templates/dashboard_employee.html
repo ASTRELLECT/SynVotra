@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard - SynVotra</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .announcement-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        
+        .announcement-item:last-child {
+            border-bottom: none;
+        }
+        
+        .announcement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .announcement-title {
+            font-weight: 500;
+            color: #34495e;
+            display: flex;
+            align-items: center;
+        }
+        
+        .announcement-date {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .announcement-content {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .unread-badge {
+            background-color: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+        
+        .view-announcement-btn {
+            background-color: transparent;
+            border: none;
+            color: #3498db;
+            padding: 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .no-announcements {
+            color: #7f8c8d;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .view-all-btn {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            border-radius: 4px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .view-all-btn:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>SynVotra</h2>
+            </div>
+            <nav>
+                <div class="menu-item active">
+                    <i class="fas fa-home"></i> Dashboard
+                </div>
+                <div class="menu-item" data-page="profile">
+                    <i class="fas fa-user"></i> My Profile
+                </div>
+                <div class="menu-item" data-page="announcement">
+                    <i class="fas fa-bullhorn"></i> Announcements
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-comments"></i> Testimonials
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-file-alt"></i> Policies
+                </div>
+                <div class="menu-item" id="logout-menu">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h1>Employee Dashboard</h1>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <img id="header-avatar-img" src="/static/uploads/avatars/default.png" alt="User Avatar">
+                    </div>
+                    <span id="header-user-name">Employee Name</span>
+                    <button class="logout-btn" id="logout-btn">Logout</button>
+                </div>
+            </div>
+
+            <div class="welcome-message">
+                <h2>Welcome to your dashboard!</h2>
+                <p>Access your work information and stay updated with company announcements.</p>
+            </div>
+
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Announcements</h3>
+                    </div>
+                    <div id="announcements-container">
+                        <!-- Announcements will be loaded here -->
+                        <div class="loading">Loading announcements...</div>
+                    </div>
+                    <div class="view-all-btn" id="view-all-announcements-btn">
+                        View All Announcements
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">My Profile</h3>
+                    </div>
+                    <div class="profile-summary">
+                        <p>Update your personal information and preferences.</p>
+                        <button class="action-button" onclick="window.location.href='/profile'">
+                            <i class="fas fa-user"></i> View Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/dashboard_employee.js"></script>
+</body>
+</html>

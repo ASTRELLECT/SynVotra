@@ -1,227 +1,104 @@
-// Authentication related functions
-document.addEventListener('DOMContentLoaded', function() {
-    // Get the login form
-    const loginForm = document.getElementById('loginForm');
-    
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
+/**
+ * Authentication Utilities
+ * Handles JWT tokens and authentication logic
+ */
 
-    // Check if user is already logged in
-    checkAuthStatus();
-
-    // Setup idle timeout
-    setupIdleTimeout();
-});
-
-// Function to handle login form submission
-async function handleLogin(event) {
-    event.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const errorElement = document.getElementById('loginError');
-    
-    try {
-        // Clear any previous error messages
-        errorElement.textContent = '';
-        
-        // Call the login API endpoint
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email,
-                password
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.message || 'Incorrect username or password');
-        }
-        
-        // Handle login success
-        handleLoginSuccess(data.token, data.user.role, getDashboardUrl(data.user.role));
-        
-        // Show success notification
-        showToast(`Welcome ${data.user.name}! Login successful.`, 'success');
-        
-    } catch (error) {
-        errorElement.textContent = error.message;
-    }
+/**
+ * Get the stored authentication token
+ * @returns {string|null} The authentication token or null
+ */
+export function getAuthToken() {
+    return localStorage.getItem('access_token') || getTokenFromCookie();
 }
 
-// Function to check if user is authenticated
-function checkAuthStatus() {
-    if (isTokenValid()) {
-        const currentPage = window.location.pathname;
-        if (currentPage === '/' || currentPage === '/landing') {
-            const userRole = localStorage.getItem('userRole');
-            const userName = localStorage.getItem('userName');
-            // Show welcome back message if user is already logged in
-            showToast(`Welcome back ${userName || ''}!`, 'info');
-            redirectBasedOnRole(userRole);
-        }
-    } else {
-        // If we're not on the login page, redirect to login
-        const currentPage = window.location.pathname;
-        if (currentPage !== '/' && currentPage !== '/landing') {
-            window.location.href = '/';
+/**
+ * Get token from cookie
+ * @returns {string|null} The token from cookie or null
+ */
+export function getTokenFromCookie() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'access_token') {
+            return value;
         }
     }
+    return null;
 }
 
-// Function to handle logout
-function logout() {
+/**
+ * Get the user's role from localStorage
+ * @returns {string} The user role or 'employee' as default
+ */
+export function getUserRole() {
+    return localStorage.getItem('user_role') || 'employee';
+}
+
+/**
+ * Get the user's ID from localStorage
+ * @returns {string|null} The user ID or null
+ */
+export function getUserId() {
+    return localStorage.getItem('user_id');
+}
+
+/**
+ * Check if the user is authenticated
+ * @returns {boolean} True if the user has a valid token
+ */
+export function isAuthenticated() {
+    const token = getAuthToken();
+    return !!token; // Convert to boolean
+}
+
+/**
+ * Perform logout by clearing tokens and redirecting
+ */
+export function logout() {
     // Clear localStorage
-    clearAuth();
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userName');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user_id');
     
-    // Redirect to login page
+    // Clear cookie
+    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    // Redirect to landing page
     window.location.href = '/';
-    
-    // Show toast notification
-    showToast('Logged out successfully', 'success');
 }
 
-// Function to redirect based on user role
-function redirectBasedOnRole(role) {
-    const dashboardUrl = getDashboardUrl(role);
-    console.log(`Redirecting to ${dashboardUrl}...`);
-    window.location.href = dashboardUrl;
-}
-
-// Function to get dashboard URL based on user role
-function getDashboardUrl(role) {
-    switch (role) {
-        case 'admin':
-            return '/admin/dashboard';
-        case 'manager':
-            return '/manager/dashboard';
-        case 'employee':
-            return '/employee/dashboard';
-        default:
-            return '/employee/dashboard';
-    }
-}
-
-// Function to set up auto-logout for inactivity
-function setupIdleTimeout() {
-    let idleTime = 0;
-    const idleInterval = 60000; // 1 minute
-    const maxIdleTime = 15; // 15 minutes max idle time
+/**
+ * Add authorization header to fetch requests
+ * @param {Object} options The fetch options object
+ * @returns {Object} The options with authorization header added
+ */
+export function withAuth(options = {}) {
+    const token = getAuthToken();
+    if (!token) return options;
     
-    // Reset the idle timer on user activity
-    const resetIdleTime = () => {
-        idleTime = 0;
-    };
-    
-    // Events that reset the idle timer
-    const events = ['mousemove', 'keypress', 'scroll', 'click', 'touchstart'];
-    events.forEach(event => {
-        document.addEventListener(event, resetIdleTime);
-    });
-    
-    // Check idle time every minute
-    setInterval(() => {
-        idleTime++;
-        
-        // If user is authenticated and idle time exceeded
-        if (isTokenValid() && idleTime >= maxIdleTime) {
-            showToast('You have been logged out due to inactivity.', 'warning');
-            logout();
-        }
-    }, idleInterval);
-}
-
-// Toast notification function
-function showToast(message, type = 'success') {
-    // Create toast if it doesn't exist
-    let toast = document.querySelector('.toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.className = 'toast';
-        document.body.appendChild(toast);
+    if (!options.headers) {
+        options.headers = {};
     }
     
-    // Set toast type and message
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <div class="toast-content">
-            <div class="toast-message">${message}</div>
-        </div>
-    `;
-    
-    // Show toast
-    setTimeout(() => toast.classList.add('active'), 100);
-    
-    // Hide toast after 3 seconds
-    setTimeout(() => {
-        toast.classList.remove('active');
-        setTimeout(() => {
-            toast.remove();
-        }, 500);
-    }, 3000);
+    options.headers['Authorization'] = `Bearer ${token}`;
+    return options;
 }
 
-// Improve token storage with more robust handling
-function storeToken(token) {
-    localStorage.setItem('token', token);
-    // Set token expiry time (24 hours from now)
-    const expiryTime = new Date();
-    expiryTime.setHours(expiryTime.getHours() + 24);
-    localStorage.setItem('tokenExpiry', expiryTime.toString());
-    console.log("Token stored successfully");
-}
-
-// Enhance token validation
-function isTokenValid() {
-    const token = localStorage.getItem('token');
-    const tokenExpiry = localStorage.getItem('tokenExpiry');
+/**
+ * Perform an authenticated fetch request
+ * @param {string} url The URL to fetch
+ * @param {Object} options The fetch options
+ * @returns {Promise} The fetch promise
+ */
+export async function authFetch(url, options = {}) {
+    const authOptions = withAuth(options);
+    const response = await fetch(url, authOptions);
     
-    if (!token) {
-        console.log("No token found");
-        return false;
+    // If unauthorized, logout and redirect
+    if (response.status === 401) {
+        logout();
+        throw new Error('Your session has expired. Please login again.');
     }
     
-    if (tokenExpiry && new Date(tokenExpiry) < new Date()) {
-        console.log("Token expired");
-        clearAuth();
-        return false;
-    }
-    
-    return true;
-}
-
-// Function to clear auth data
-function clearAuth() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('tokenExpiry');
-    localStorage.removeItem('userRole');
-}
-
-// Prevent unauthorized access to protected pages
-function protectRoute() {
-    if (!isTokenValid()) {
-        console.log("Unauthorized access attempt - redirecting to login");
-        window.location.href = "/login";
-        return false;
-    }
-    return true;
-}
-
-// Handle login success
-function handleLoginSuccess(token, userRole, redirectPath) {
-    storeToken(token);
-    localStorage.setItem('userRole', userRole);
-    console.log("Login successful, redirecting to:", redirectPath);
-    
-    // Use replaceState instead of location.href to avoid creating history entries
-    window.location.replace(redirectPath);
+    return response;
 }

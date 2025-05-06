@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Policies - SynVotra</title>
+    <link rel="stylesheet" href="static/css/common.css">
+    <link rel="stylesheet" href="static/css/policies.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header will be dynamically loaded -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1>Company Policies</h1>
+                <p>Important guidelines and policies for all employees</p>
+                
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="text" id="policy-search" placeholder="Search policies...">
+                        <button class="btn btn-icon"><i class="fas fa-search"></i></button>
+                    </div>
+                    
+                    <div class="filter-options">
+                        <select id="category-filter">
+                            <option value="all">All Categories</option>
+                            <option value="hr">HR Policies</option>
+                            <option value="it">IT Policies</option>
+                            <option value="safety">Safety Policies</option>
+                            <option value="finance">Finance Policies</option>
+                            <option value="general">General Policies</option>
+                        </select>
+                    </div>
+                    
+                    <button id="add-policy-btn" class="btn btn-primary admin-only">
+                        <i class="fas fa-plus"></i> Add New Policy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Policy listing -->
+            <div id="policies-container" class="policies-container">
+                <!-- Policies will be populated here -->
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Loading policies...</p>
+                </div>
+            </div>
+
+            <!-- Policy card template -->
+            <template id="policy-template">
+                <div class="policy-card" data-id="">
+                    <div class="policy-header">
+                        <h3 class="policy-title"></h3>
+                        <span class="policy-category"></span>
+                    </div>
+                    <div class="policy-content">
+                        <p class="policy-description"></p>
+                    </div>
+                    <div class="policy-footer">
+                        <div class="policy-meta">
+                            <span class="policy-date">
+                                <i class="fas fa-calendar-alt"></i> <span class="date-text"></span>
+                            </span>
+                            <span class="policy-version">
+                                <i class="fas fa-code-branch"></i> Version <span class="version-text"></span>
+                            </span>
+                        </div>
+                        <div class="policy-actions">
+                            <button class="btn btn-secondary view-policy-btn">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="btn btn-primary edit-policy-btn admin-only">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-danger delete-policy-btn admin-only">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Empty state template -->
+            <template id="empty-state-template">
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>No policies found</h3>
+                    <p>There are no policies available that match your criteria.</p>
+                </div>
+            </template>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <button id="prev-page" class="btn btn-secondary" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span id="page-info">Page 1 of 1</span>
+                <button id="next-page" class="btn btn-secondary" disabled>
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Policy Form Modal -->
+    <div id="policy-form-modal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="form-title">Add New Policy</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="policy-form">
+                    <div class="form-group">
+                        <label for="policy-title">Policy Title</label>
+                        <input type="text" id="policy-title" name="title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="policy-category">Category</label>
+                        <select id="policy-category" name="category" required>
+                            <option value="">Select a category</option>
+                            <option value="hr">HR Policies</option>
+                            <option value="it">IT Policies</option>
+                            <option value="safety">Safety Policies</option>
+                            <option value="finance">Finance Policies</option>
+                            <option value="general">General Policies</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="policy-description">Short Description</label>
+                        <textarea id="policy-description" name="description" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="policy-content">Full Policy Content</label>
+                        <textarea id="policy-content" name="content" rows="10" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="policy-version">Version</label>
+                        <input type="text" id="policy-version" name="version" placeholder="1.0" required>
+                    </div>
+                    
+                    <div class="form-group file-upload">
+                        <label for="policy-file">Upload Policy Document (Optional)</label>
+                        <div class="file-upload-container">
+                            <input type="file" id="policy-file" name="file">
+                            <div class="file-upload-button">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Choose File</span>
+                            </div>
+                            <div class="file-name">No file chosen</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Policy</button>
+                        <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Policy View Modal -->
+    <div id="policy-view-modal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="view-policy-title"></h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="policy-view-meta">
+                    <span class="policy-view-category"></span>
+                    <span class="policy-view-version"></span>
+                    <span class="policy-view-date"></span>
+                </div>
+                
+                <div class="policy-view-content"></div>
+                
+                <div class="policy-view-actions">
+                    <a id="download-policy-btn" class="btn btn-primary" target="_blank" download>
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                    <button class="btn btn-secondary close-modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="confirm-title">Confirm Action</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message"></p>
+                <div class="form-actions">
+                    <button id="confirm-action" class="btn btn-danger">Confirm</button>
+                    <button class="btn btn-secondary close-modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container for notifications -->
+    <div class="toast-container"></div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script src="static/js/common.js"></script>
+    <script src="static/js/policies.js"></script>
+</body>
+</html>

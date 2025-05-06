@@ -197,7 +197,7 @@ async def create_Announcement(
 
 @announcement_router.put("/mark-as-read")
 async def mark_announcement_as_read(
-    announcement_id: uuid.UUID,
+    announcement_data: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -205,6 +205,15 @@ async def mark_announcement_as_read(
     Mark an announcement as read for the current user.
     """
     try:
+        # Get announcement_id from request body
+        if "announcement_id" not in announcement_data:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Field required: announcement_id must be provided"
+            )
+        
+        announcement_id = announcement_data.get("announcement_id")
+        
         recipient = db.query(AnnouncementRecipient).filter(
             AnnouncementRecipient.announcement_id == announcement_id,
             AnnouncementRecipient.user_id == current_user.id
@@ -284,4 +293,3 @@ async def delete_announcement(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while deleting the announcement"
         )
-        
