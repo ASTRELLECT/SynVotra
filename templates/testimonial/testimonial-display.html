@@ -344,7 +344,7 @@
   
         alert('✅ Testimonial submitted successfully!');
         form.reset();
-        previewImg.style.display = 'none';
+        if (previewImg) previewImg.style.display = 'none';
         formTitle.textContent = "📝 Submit Your Testimonial";
 
       } catch (error) {
@@ -354,7 +354,7 @@
 
     clearBtn.addEventListener('click', function () {
       form.reset();
-      previewImg.style.display = 'none';
+      if (previewImg) previewImg.style.display = 'none';
       formTitle.textContent = "📝 Submit Your Testimonial";
     });
 </script>
