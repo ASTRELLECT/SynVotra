@@ -6,7 +6,26 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((response) => response.text())
       .then((data) => {
         sidebarContainer.innerHTML = data;
-
+        const token = localStorage.getItem("astrellect_token");
+        if (token) {
+          fetch("/astrellect/v1/employees/get-me", {
+            headers: { "Authorization": `Bearer ${token}` }
+          })
+            .then(res => {
+              if (!res.ok) throw new Error();
+              return res.json();
+            })
+            .then(user => {
+              if (user.role && user.role.toLowerCase() === "admin") {
+                document.querySelectorAll(".admin-only").forEach(el => {
+                  el.style.display = "block";
+                });
+              }
+            })
+            .catch(() => {
+              // leave admin-only hidden on error or if not admin
+            });
+        }
         // Highlight the active menu item based on current page
         const currentPage = window.location.pathname.split("/").pop();
         const menuItem = document.getElementById(
@@ -14,15 +33,6 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         if (menuItem) {
           menuItem.classList.add("active");
-        }
-
-        // Check user role and show/hide admin elements
-        const userRole = getUserRole(); // This function would get the user role from a session or API
-        if (userRole === "admin") {
-          const adminElements = document.querySelectorAll(".admin-only");
-          adminElements.forEach((element) => {
-            element.style.display = "block";
-          });
         }
       })
       .catch((error) => console.error("Error loading sidebar:", error));

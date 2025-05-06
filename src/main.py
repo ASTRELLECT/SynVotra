@@ -144,6 +144,9 @@ def _get_app():
     @app.get("/testimonial", response_class=HTMLResponse)
     async def testimonialDisplay(request: Request):
         return templates.TemplateResponse('testimonial/testimonial-display.html', {'request': request})
+    @app.get("/testimonial-admin-view", response_class=HTMLResponse)
+    async def testimonialAdminDisplay(request: Request):
+        return templates.TemplateResponse('testimonial/admin-testimonial-view.html', {'request': request})
 
     return app
 

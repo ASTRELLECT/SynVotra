@@ -19,323 +19,127 @@
     <script src="/static/common-script/components-loader.js"></script>
   <!-- Styles -->
   <style>
-    /* Variables */
-    :root {
-      --primary: #090a11;
-      --primary-light: #33353b;
-      --primary-dark: #090a0f;
-      --secondary: #f50057;
-      --light-gray: #f5f5f5;
-      --medium-gray: #e0e0e0;
-      --dark-gray: #757575;
-      --success: #4caf50;
-      --warning: #ff9800;
-      --danger: #f44336;
-      --white: #ffffff;
-      --shadow: 0 2px 5px rgba(0,0,0,0.15);
-      --border: #e5e7eb;
-    }
-
-    /* Reset and basic styling */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: var(--light-gray);
-      background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-      color: var(--dark-gray);
-      padding: 0;
-      margin: 0;
-    }
-
-    body::before {
-      content: "SynVotra";
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(-30deg);
-      font-size: 6rem;
-      color: rgba(0, 0, 0, 0.04);
-      white-space: nowrap;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .container {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      width: 260px;
-      background-color: var(--primary);
-      color: var(--white);
-      padding: 20px 0;
-      height: 100vh;
-      position: fixed;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow);
-      z-index: 10;
-      overflow-y: auto;
-    }
-
-    .sidebar-header {
-      padding: 0 20px 20px;
-      border-bottom: 1px solid var(--primary-light);
-      text-align: center;
-    }
-
-    .company-logo {
-      height: 60px;
-      margin-bottom: 10px;
-      background-color: var(--white);
-      border-radius: 50%;
-      padding: 5px;
-    }
-
-    .sidebar-menu {
-      margin-top: 20px;
-      list-style: none;
-    }
-
-    .sidebar-menu li {
-      margin-bottom: 5px;
-    }
-
-    .sidebar-menu a {
-      padding: 12px 20px;
-      color: var(--white);
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-
-    .sidebar-menu a:hover,
-    .sidebar-menu a.active {
-      background-color: var(--primary-light);
-      border-right: 4px solid var(--secondary);
-    }
-
-    .sidebar-menu a i {
-      margin-right: 10px;
-      font-size: 18px;
-    }
-
-    /* Main Content */
-    .main-content {
-      flex: 1;
-      margin-left: 260px;
-      padding: 20px;
-      transition: all 0.3s ease;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Header */
-    .header {
-      background-color: var(--white);
-      padding: 15px 25px;
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .search-bar {
-      flex: 1;
-      max-width: 600px;
-      position: relative;
-      margin-right: 20px;
-    }
-
-    .search-bar input {
-      width: 100%;
-      padding: 10px 15px;
-      border: 1px solid var(--medium-gray);
-      border-radius: 25px;
-      font-size: 14px;
-    }
-
-    .search-bar button {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: var(--dark-gray);
-      cursor: pointer;
-    }
-
-    .user-menu {
-      display: flex;
-      align-items: center;
-    }
-
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      background-color: var(--medium-gray);
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-right: 10px;
-    }
-
-    .user-avatar i {
-      font-size: 24px;
-    }
-
-    .user-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .user-name {
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    .user-role {
-      font-size: 12px;
-      color: var(--dark-gray);
-    }
-
-    /* Testimonials Section */
+    /* Section Headings */
     h2 {
       font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    .testimonial-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
+      margin: 2rem 0 1rem;
       display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      align-items: center;
+      gap: 0.5rem;
     }
-
-    .testimonial-card img {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary);
+  
+    /* Testimonial Cards */
+    #testimonial-list, .testimonial-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
     }
-
+    .testimonial-card {
+      background: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
     .testimonial-info {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
       flex: 1;
     }
-
     .testimonial-info h4 {
       margin: 0;
       font-size: 1.1rem;
-      font-weight: bold;
+      font-weight: 600;
     }
-
     .testimonial-info small {
-      display: block;
-      color: gray;
+      color: var(--gray);
+      margin-bottom: 0.75rem;
     }
-
     .testimonial-info p {
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
+      flex: 1;
+      line-height: 1.5;
+      color: #333;
     }
-
-    .timestamp {
+    .testimonial-footer {
+      text-align: right;
+      padding: 0 1.5rem 1rem;
       font-size: 0.8rem;
-      color: #9ca3af;
-      margin-top: 0.5rem;
+      color: #6b7280;
     }
-
-    .actions button {
-      background: none;
-      border: none;
-      color: var(--primary-dark);
-      font-size: 0.85rem;
-      cursor: pointer;
-      margin-right: 0.5rem;
-    }
-
-    form {
-      background: white;
-      padding: 2rem;
+  
+    /* Submission Form */
+    form#testimonial-form {
+      background: #fff;
       border-radius: 1rem;
       box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-      margin-top: 2rem;
+      padding: 2rem;
+      margin: 2rem 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
     }
-
-    input, textarea {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 1rem;
+    form#testimonial-form h3 {
+      grid-column: 1 / -1;
+      margin: 0 0 1rem;
+      font-size: 1.25rem;
+    }
+    form#testimonial-form textarea {
+      grid-column: 1 / -1;
+      resize: vertical;
+      min-height: 120px;
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 0.75rem;
+      padding: 1rem;
       font-size: 1rem;
     }
-
     .form-buttons {
+      grid-column: 1 / -1;
       display: flex;
+      justify-content: flex-end;
       gap: 1rem;
-      margin-top: 1.5rem;
     }
-
     .form-buttons button {
       padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
       font-size: 1rem;
+      transition: background .2s;
+    }
+    .form-buttons button[type="submit"] {
+      background: var(--primary);
+      color: #fff;
       border: none;
-      border-radius: 8px;
-      cursor: pointer;
     }
-
-    button[type="submit"] {
-      background-color: var(--primary);
-      color: white;
+    .form-buttons button[type="submit"]:hover {
+      background: var(--primary-light);
     }
-
-    button[type="submit"]:hover {
-      background-color: var(--primary-light);
+    .form-buttons button#clear-btn {
+      background: var(--gray-light);
+      color: #333;
+      border: none;
     }
-
-    #clear-btn {
-      background-color: #6b7280;
-      color: white;
+    .form-buttons button#clear-btn:hover {
+      background: var(--gray);
+      color: #fff;
     }
-
-    #clear-btn:hover {
-      background-color: #4b5563;
-    }
-
-    #preview-img {
-      margin-top: 1rem;
-      width: 64px;
-      height: 64px;
-      object-fit: cover;
-      border-radius: 50%;
-      border: 2px solid var(--primary);
-      display: none;
-    }
-
-    /* Material Icons */
-    .material-icons {
-      font-family: 'Material Icons';
-      font-size: 24px;
+  
+    /* Empty & Error States */
+    .no-items, .empty-state, .error {
+      text-align: center;
+      color: var(--dark-gray);
+      padding: 2rem;
+      grid-column: 1 / -1;
+      background: #f9fafb;
+      border-radius: 0.75rem;
     }
   </style>
+  
 </head>
 
 <body>
@@ -349,21 +153,8 @@
   <div class="main-content">
     
     <!-- Header -->
-    <div class="header">
-      <div class="search-bar">
-        <input type="text" placeholder="Search across the portal...">
-        <button><i class="material-icons">search</i></button>
-      </div>
-      <div class="user-menu">
-        <div class="user-avatar"><i class="user-avatar"></i></div>
-        <div class="user-info">
-            <div class="user-name" id="fullName">Loading...</div>
-            <div class="user-role" id="jobTitle">Loading...</div>
-          </div>
-          
-      </div>
-    </div>
-
+    <div id="header-container"></div>
+    <br>
     <!-- Testimonials -->
     <h2>🌟 Employee Testimonials</h2>
     <div id="testimonial-list"></div>
@@ -371,13 +162,14 @@
     <form id="testimonial-form">
       <h3 id="form-title">📝 Submit Your Testimonial</h3>
       <textarea id="message" rows="4" placeholder="Your Message..." required></textarea>
-      <img id="preview-img" alt="Preview">
       <div class="form-buttons">
         <button type="submit">Submit</button>
         <button type="button" id="clear-btn">Clear</button>
       </div>
     </form>
-
+    <br>
+    <!-- Approved Testimonials List -->
+    <div id="testimonial-list"></div>
   </div>
 </div>
 
@@ -565,6 +357,63 @@
       previewImg.style.display = 'none';
       formTitle.textContent = "📝 Submit Your Testimonial";
     });
+</script>
+<script>
+  (function() {
+    const API_T = `${window.location.origin}/astrellect/v1/testimonials`;
+    const token = localStorage.getItem('astrellect_token');
+    const listEl = document.getElementById('testimonial-list');
+    if (!listEl) return;
+
+    document.addEventListener('DOMContentLoaded', loadApprovedTestimonials);
+
+    async function loadApprovedTestimonials() {
+      listEl.innerHTML = '';
+      try {
+        const res = await fetch(API_T, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        // If backend returns 404 for "no testimonials", treat as empty list
+        if (res.status === 404) {
+          listEl.innerHTML = '<p class="empty-state">No testimonials to display.</p>';
+          return;
+        }
+
+        if (!res.ok) throw new Error(`Failed to load (${res.status})`);
+        const { testimonials } = await res.json();
+
+        const approved = Array.isArray(testimonials)
+          ? testimonials.filter(t => t.status === 'Approved')
+          : [];
+
+        if (approved.length === 0) {
+          listEl.innerHTML = '<p class="empty-state">No testimonials to display.</p>';
+          return;
+        }
+
+        approved.forEach(t => {
+          const date = new Date(t.created_at).toLocaleDateString();
+          const card = document.createElement('div');
+          card.className = 'testimonial-card';
+          card.innerHTML = `
+            <div class="testimonial-header">
+              <div class="testimonial-author">
+                <h4>${t.user_first_name || 'Anonymous'}</h4>
+                <small>${date}</small>
+              </div>
+            </div>
+            <div class="testimonial-content">${t.content}</div>
+          `;
+          listEl.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error(err);
+        listEl.innerHTML = `<p class="error">Error loading testimonials: ${err.message}</p>`;
+      }
+    }
+  })();
 </script>
 </body>
 </html>
