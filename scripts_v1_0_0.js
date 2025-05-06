@@ -1,19 +1,15 @@
-
 const userId = localStorage.getItem("user_id");
-const token = localStorage.getItem("access_token"); 
-
+const token = localStorage.getItem("access_token");
 
 function enableEdit() {
   document.getElementById('verify-section').classList.remove('hidden');
 }
-
 
 function sendCode() {
   const newNumber = document.getElementById('new-number').value.trim();
   if (!newNumber) return alert("Enter a new number");
   alert(`Verification code sent to ${newNumber}`);
 }
-
 
 function submitContactUpdate() {
   const code = document.getElementById('code-input').value.trim();
@@ -28,30 +24,28 @@ function submitContactUpdate() {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}` 
+      "Authorization": `Bearer ${token}`
     },
-    body: JSON.stringify({ phone: newNumber })
+    body: JSON.stringify({ contact_number: newNumber })
   })
-  .then(res => {
-    if (!res.ok) throw new Error("Update failed");
-    return res.json();
-  })
-  .then(() => {
-    document.getElementById('contact-number').value = newNumber;
-    document.getElementById('verified-msg').style.display = "inline-block";
-    document.getElementById('update-msg').innerText = "Number updated!";
-  })
-  .catch(err => {
-    console.error("Contact update error:", err);
-    alert("Failed to update number.");
-  });
+    .then(res => {
+      if (!res.ok) throw new Error("Update failed");
+      return res.json();
+    })
+    .then(() => {
+      document.getElementById('contact-number').value = newNumber;
+      document.getElementById('verified-msg').style.display = "inline-block";
+      document.getElementById('update-msg').innerText = "Number updated!";
+    })
+    .catch(err => {
+      console.error("Contact update error:", err);
+      alert("Failed to update number.");
+    });
 }
-
 
 function resendCode() {
   alert("Verification code resent.");
 }
-
 
 function previewImage() {
   const file = document.getElementById('profile-upload').files[0];
@@ -64,37 +58,70 @@ function previewImage() {
   }
 }
 
+let selectedAvatarId = null;
+
+function loadAvatars() {
+  fetch(`/astrellect/v1/employees/${userId}/avatars`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("avatar-list");
+      container.innerHTML = "";
+
+      data.avatars.forEach(avatar => {
+        const img = document.createElement("img");
+        img.src = avatar.url;
+        img.alt = avatar.name;
+        img.className = "avatar-option";
+        img.onclick = () => {
+          selectedAvatarId = avatar.id;
+          highlightSelected(img);
+        };
+        container.appendChild(img);
+      });
+    })
+    .catch(err => {
+      console.error("Failed to load avatars:", err);
+    });
+}
+
+function highlightSelected(selectedImg) {
+  const allAvatars = document.querySelectorAll(".avatar-option");
+  allAvatars.forEach(img => img.style.border = "2px solid transparent");
+  selectedImg.style.border = "2px solid blue";
+}
+
 function uploadProfilePicture() {
-  const file = document.getElementById("profile-upload").files[0];
-  if (!file) return alert("Select an image first");
+  if (!selectedAvatarId) {
+    alert("Please select an avatar first.");
+    return;
+  }
 
-  const formData = new FormData();
-  formData.append("avatar_type", "upload");
-  formData.append("profileImage", file);
-
-  fetch("/astrellect/v1/employees/update_profile_picture", {
+  fetch("/astrellect/v1/employees/profile-picture", {
     method: "PUT",
     headers: {
-      "Authorization": `Bearer ${token}`  
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
     },
-    body: formData
+    body: JSON.stringify({ avatar_id: selectedAvatarId })
   })
-  .then(res => {
-    if (!res.ok) throw new Error("Upload failed");
-    return res.json();
-  })
-  .then(data => {
-    alert("Profile picture uploaded!");
-    if (data.newImageUrl) {
-      document.getElementById("preview-pic").src = data.newImageUrl;
-    }
-    document.getElementById("toast").style.display = "block";
-    setTimeout(() => {
-      document.getElementById("toast").style.display = "none";
-    }, 3000);
-  })
-  .catch(err => {
-    console.error("Upload error:", err);
-    alert("Upload failed.");
-  });
+    .then(res => res.json())
+    .then(data => {
+      alert("Profile picture updated!");
+      document.getElementById("toast").style.display = "block";
+      setTimeout(() => {
+        document.getElementById("toast").style.display = "none";
+      }, 3000);
+    })
+    .catch(err => {
+      console.error("Upload error:", err);
+      alert("Upload failed.");
+    });
 }
+
+window.onload = () => {
+  loadAvatars();
+};
