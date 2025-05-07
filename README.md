@@ -1,397 +1,208 @@
-# Astrellect API
+# Astrellect Project
 
 A FastAPI-powered backend API created by Team Astrellect.
 
+## Project Overview
+
+SynVotra is a robust API solution designed for managing employees, authentication, and other administrative functionalities. It provides a structured and scalable platform for business processes.
+
+---
+
+## Abstract Introduction
+
+The development team's cooperative efforts were crucial in using a methodical approach to solve computational difficulties. They designed and implemented a solution that demonstrated efficiency and scalability by applying their technical expertise and problem-solving abilities. From strategy and research to execution and testing, every team member was essential to the success of the finished product.
+
+In addition to creating a workable system, the project helped the team gain a deeper comprehension of practical development techniques. They explored topics like parallel processing and collaborative coding environments by applying theoretical ideas in programming, system design, and performance optimization to a practical task. Despite running into technological issues, these challenges improved development tactics and bolstered teamwork. The project also provided an opportunity to experience the entire software development lifecycle in a team environment, preparing the team to take on challenging technical duties in the future.
+
+---
+
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
+- [Team Members](#team-members)
+- [Branches](#branches)
+- [Merged Pull Requests](#merged-pull-requests)
 - [Setup Instructions](#setup-instructions)
-  - [Ubuntu Setup](#ubuntu-setup)
-  - [Windows Setup](#windows-setup)
-- [Database Management](#database-management)
-  - [Database Initialization](#database-initialization)
-  - [Verifying Database Structure](#verifying-database-structure)
-- [Authentication](#authentication)
-  - [JWT Authentication Setup](#jwt-authentication-setup)
-  - [Securing Endpoints](#securing-endpoints)
-  - [Using JWT Tokens](#using-jwt-tokens)
 - [Running the Application](#running-the-application)
 - [API Documentation](#api-documentation)
 - [Project Structure](#project-structure)
-- [Development Workflows](#development-workflows)
-  - [Adding New Models](#adding-new-models)
-  - [Adding New Routes](#adding-new-routes)
-  - [Updating Existing Models](#updating-existing-models)
-  - [Database Reset](#database-reset)
-- [API Resources](#api-resources)
-  - [Users/Employees API](#usersemployees-api)
-  - [Authentication API](#authentication-api)
 - [Troubleshooting](#troubleshooting)
-  - [Common Issues](#common-issues)
 
-## Prerequisites
+---
 
-- Python 3.8+
-- pip (Python package installer)
-- Git (optional, for cloning the repository)
+## Team Members
+
+Unfortunately, I couldn't fetch the complete details of team members. Please ensure collaborators are listed manually.
+
+---
+
+## Branches
+
+Here are some active branches in the repository:
+
+- `feat_CompanyPolicy`
+- `feat-SynVotra-example`
+- `feat-admin-get-employee-profiles`
+- `feat-announcement-apis`
+- `feat-companyPolicy`
+- `feat-database-alembic`
+- `feat-errorMessage`
+- `feat-get-avatars-init`
+- `feat-landingpage`
+- `feat-login-jwt`
+
+For more details, visit the [Branches Page](https://github.com/ASTRELLECT/SynVotra/branches).
+
+---
+
+## Merged Pull Requests
+
+Here is a list of recently merged pull requests:
+
+```list type="pr"
+data:
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/136"
+  state: "closed"
+  title: "Frontend/testimonial"
+  number: 136
+  merged_at: "2025-05-06T14:10:31Z"
+  author: "savanamd21"
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/135"
+  state: "closed"
+  title: "updated sidebar.html and added back button"
+  number: 135
+  merged_at: "2025-05-06T12:35:57Z"
+  author: "A5H1Q"
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/106"
+  state: "closed"
+  title: "Add home page dashboard for user groups UI - Frontend - Backlog (Sprint - 1)"
+  number: 106
+  merged_at: "2025-04-28T10:14:36Z"
+  author: "aiswaryark111"
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/133"
+  state: "closed"
+  title: "company-logo and show employee details on header bar"
+  number: 133
+  merged_at: "2025-05-06T10:41:22Z"
+  author: "aiswaryark111"
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/59"
+  state: "closed"
+  title: "updated all employee profiles page"
+  number: 59
+  merged_at: "2025-04-23T22:48:59Z"
+  author: "A5H1Q"
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/107"
+  state: "closed"
+  title: "redirection from login to home-page html, logout js file"
+  number: 107
+  merged_at: "2025-05-06T10:35:21Z"
+  author: "Ramineni-7"
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/131"
+  state: "closed"
+  title: "Frontend/announcement system UI for admin and manager"
+  number: 131
+  merged_at: "2025-05-05T17:53:37Z"
+  author: "amitpramodphadol"
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/61"
+  state: "closed"
+  title: "feat: change password button is integrated with backend."
+  number: 61
+  merged_at: "2025-05-05T16:17:06Z"
+  author: "savanamd21"
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/108"
+  state: "closed"
+  title: "Frontend/admin view all employees page"
+  number: 108
+  merged_at: "2025-05-05T00:28:56Z"
+  author: "A5H1Q"
+- url: "https://github.com/ASTRELLECT/SynVotra/pull/104"
+  state: "closed"
+  title: "Backend: Initialize avatars into database and fetch the avatars using the GET API"
+  number: 104
+  merged_at: "2025-04-26T19:07:40Z"
+  author: "ashrej09"
+```
+
+For a complete list, visit the [Pull Requests Page](https://github.com/ASTRELLECT/SynVotra/pulls?q=is:pr+is:merged+sort:updated-desc).
+
+---
 
 ## Setup Instructions
 
+Follow the instructions below to set up the project:
+
 ### Ubuntu Setup
-
-1. **Clone the repository** (if using Git):
-
-   ```bash
-   git clone https://github.com/ASTRELLECT/SynVotra.git
-   cd SynVotra
-   ```
-
-2. **Create and activate a virtual environment**:
-
-   ```bash
-   python3 -m venv ast_env
-   source ast_env/bin/activate
-   ```
-
-3. **Install dependencies**:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-   If requirements.txt is missing, install these packages:
-
-   ```bash
-   pip install fastapi uvicorn sqlalchemy passlib bcrypt python-jose[cryptography] pydantic python-multipart jinja2 python-dotenv
-   ```
-
-4. **Create database directory**:
-
-   ```bash
-   mkdir -p database
-   ```
-
-5. **Initialize the database**:
-
-   ```bash
-   # Create database and tables
-   python src/database/init_db.py
-   ```
-
-### Windows Setup
-
-1. **Clone the repository** (if using Git):
-
-   ```cmd
-   git clone https://github.com/ASTRELLECT/SynVotra.git
-   cd SynVotra
-   ```
-
-2. **Create and activate a virtual environment**:
-
-   ```cmd
-   python -m venv ast_env
-   ast_env\Scripts\activate
-   ```
-
-3. **Install dependencies**:
-
-   ```cmd
-   pip install -r requirements.txt
-   ```
-
-   If requirements.txt is missing, install these packages:
-
-   ```cmd
-   pip install fastapi uvicorn sqlalchemy passlib bcrypt python-jose[cryptography] pydantic python-multipart jinja2 python-dotenv
-   ```
-
-4. **Create database directory**:
-
-   ```cmd
-   mkdir database
-   ```
-
-5. **Initialize the database**:
-
-   ```cmd
-   python src\database\init_db.py
-   ```
-
-## Database Management
-
-The application uses SQLAlchemy ORM with SQLite database. The database schema is managed directly through SQLAlchemy model definitions.
-
-### Database Initialization
-
-The database is automatically initialized when the application starts. The initialization process:
-
-1. Creates all tables defined in the models
-2. Creates an admin user if one doesn't exist
-
-You can manually initialize the database by running:
-
-#### Ubuntu
-
 ```bash
+git clone https://github.com/ASTRELLECT/SynVotra.git
+cd SynVotra
+python3 -m venv ast_env
+source ast_env/bin/activate
+pip install -r requirements.txt
+mkdir -p database
 python src/database/init_db.py
 ```
 
-#### Windows
-
+### Windows Setup
 ```cmd
+git clone https://github.com/ASTRELLECT/SynVotra.git
+cd SynVotra
+python -m venv ast_env
+ast_env\Scripts\activate
+pip install -r requirements.txt
+mkdir database
 python src\database\init_db.py
 ```
 
-### Verifying Database Structure
-
-You can check your database structure using the provided check_database.py script:
-
-#### Ubuntu
-
-```bash
-python check_database.py
-```
-
-#### Windows
-
-```cmd
-python check_database.py
-```
-
-This will show all tables in your database along with their columns, helping you verify that everything is set up correctly.
-
-## Authentication
-
-The API uses JWT (JSON Web Token) authentication to secure endpoints and manage user sessions.
-
-### JWT Authentication Setup
-
-To set up JWT authentication in your application, follow these steps:
-
-1. **Install required packages**:
-   - `python-jose[cryptography]`: For JWT token generation and validation
-   - `passlib`: For password hashing
-   - `python-dotenv`: For managing environment variables
-
-2. **Create necessary directories and files**:
-   - Create `src/auth/` directory with `__init__.py` and `auth.py` files
-   - Create `src/resources/secret.py` file for security configuration
-   - Create `src/routes/auth.py` file for authentication endpoints
-
-3. **Set up JWT configuration**:
-   - Define a secret key (preferably in environment variables)
-   - Set JWT algorithm (typically HS256)
-   - Set token expiration time
-
-4. **Implement core authentication functions**:
-   - Token generation function
-   - User authentication function
-   - Token validation middleware
-   - Role-based access control helpers
-
-5. **Create authentication endpoints**:
-   - Login endpoint to generate tokens
-   - Password change endpoint
-   - Register the auth router in `src/routes/__init__.py`
-
-### Securing Endpoints
-
-To secure your API endpoints with JWT authentication:
-
-1. **Import authentication dependencies** in your route files:
-   - Import `get_current_user` and `get_admin_user` from the auth module
-
-2. **Add the dependencies to your endpoint functions**:
-   - For user authentication: `current_user: User = Depends(get_current_user)`
-   - For admin-only endpoints: `current_user: User = Depends(get_admin_user)`
-
-3. **Implement role-based access control**:
-   - Regular users should only access their own data
-   - Admin users can access all data
-   - Check user permissions in your endpoint handlers
-
-### Using JWT Tokens
-
-To use JWT authentication with your API:
-
-1. **Get an access token** by sending a POST request to the login endpoint:
-   - Endpoint: `POST /astrellect/v1/auth/token`
-   - Form data: `username` (email) and `password`
-   - Response will include `access_token` and `token_type`
-
-2. **Include the token in API requests**:
-   - Add an `Authorization` header with the value `Bearer YOUR_TOKEN`
-   - The token will be automatically validated by the authentication middleware
-
-3. **Handle token expiration**:
-   - When a token expires, the API will return a 401 Unauthorized error
-   - The client should redirect to the login page to get a new token
+---
 
 ## Running the Application
 
 ### Ubuntu
-
 ```bash
 uvicorn src.main:_get_app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ### Windows
-
 ```cmd
 uvicorn src.main:_get_app --reload
 ```
 
-The API will be available at http://localhost:8000
+Access the API at [http://localhost:8000](http://localhost:8000).
+
+---
 
 ## API Documentation
 
-Once the server is running, you can access:
+Access the documentation:
+- Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- ReDoc: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
-- Swagger UI documentation: http://localhost:8000/docs
-- ReDoc documentation: http://localhost:8000/redoc
+---
 
 ## Project Structure
 
 ```
 SynVotra/
-│
 ├── database/                # Database directory
-│   └── astrellect.db        # SQLite database file
-│
 ├── requirements.txt         # Python dependencies
-│
 ├── src/                     # Application source code
-│   ├── auth/                # Authentication related modules
-│   │   ├── __init__.py      
-│   │   └── auth.py          # JWT authentication logic
-│   │
-│   ├── database/            # Database related modules
-│   │   ├── __init__.py      # Database connection setup
-│   │   ├── base.py          # SQLAlchemy Base
-│   │   ├── crud.py          # CRUD operations
-│   │   ├── init_db.py       # Database initialization
-│   │   ├── models.py        # SQLAlchemy models
-│   │   └── utils.py         # Database utilities
-│   │
+│   ├── auth/                # Authentication modules
+│   ├── database/            # Database modules
 │   ├── main.py              # Main application entry point
-│   │
 │   ├── pydantic_model/      # Pydantic schemas
-│   │   ├── users.py         # User schemas
-│   │   └── [other_schemas].py # Other schema files
-│   │
 │   ├── resources/           # Resources and constants
-│   │   ├── constants.py     # Application constants
-│   │   └── secret.py        # Security configuration
-│   │
 │   └── routes/              # API routes
-│       ├── __init__.py      # Routes registration
-│       ├── auth.py          # Authentication endpoints
-│       ├── users.py         # Users endpoints
-│       └── [other_routes].py # Other route files
-│
 ├── static/                  # Static files
-│
 └── templates/               # Jinja2 templates
 ```
 
-## Development Workflows
-
-### Adding New Models
-
-When adding new models to your application:
-
-1. **Define the model** in `src/database/models.py`
-2. **Create Pydantic schemas** for API requests/responses in `src/pydantic_model/`
-3. **Update the database initialization script** if needed
-4. **Run the initialization script** to recreate the database schema:
-   ```bash
-   python src/database/init_db.py
-   ```
-5. **Create API routes** in the appropriate files
-6. **Register the routes** in `src/routes/__init__.py`
-
-### Adding New Routes
-
-To add new secured endpoints to your application:
-
-1. **Create a new router file** in the `src/routes/` directory
-2. **Import the authentication dependencies** from the auth module
-3. **Add security to your endpoints** using the Depends() function with the appropriate security dependency
-4. **Implement role-based access control** in your endpoint handlers
-5. **Register the router** in `src/routes/__init__.py`
-
-### Updating Existing Models
-
-When modifying existing models:
-
-1. **Update the model definition** in `src/database/models.py`
-2. **Update any affected Pydantic schemas**
-3. **Update the database initialization script** if needed
-4. **Reset the database** to apply changes:
-   ```bash
-   # First, make a backup of any important data
-   # Then reset the database
-   python src/database/init_db.py
-   ```
-5. **Update any affected API handlers**
-
-### Database Reset
-
-If you need to reset your database during development:
-
-#### Ubuntu
-
-```bash
-# Remove the existing database
-rm -f database/astrellect.db
-```
-
-#### Windows
-
-```cmd
-del database\astrellect.db
-```
-
-## API Resources
-
-### Users/Employees API
-
-- `GET /astrellect/v1/employees/getall` - Get all users (admin only)
-- `GET /astrellect/v1/employees/{user_id}` - Get user by ID (admin or own record)
-- `POST /astrellect/v1/employees/create` - Create a new user (admin only)
-- `PUT /astrellect/v1/employees/update/{user_id}` - Update user (admin or own record)
-- `DELETE /astrellect/v1/employees/delete/{user_id}` - Delete user (admin only)
-
-### Authentication API
-
-- `POST /astrellect/v1/auth/token` - Get JWT token
-- `POST /astrellect/v1/auth/change-password` - Change password (for authenticated user)
+---
 
 ## Troubleshooting
 
-### Common Issues
+1. **"Could not validate credentials"** - JWT token is missing or expired. Log in again.
+2. **"Not enough permissions"** - Use an admin account to access the endpoint.
+3. **Database tables not appearing** - Ensure models are properly defined and imported.
 
-1. **"Could not validate credentials"** - JWT token is missing, invalid or expired
-   - Solution: Get a new token by logging in again
+---
 
-2. **"Not enough permissions"** - User doesn't have required admin privileges
-   - Solution: Use an admin account to access the endpoint
-
-3. **bcrypt version error:**
-   - Solution: Upgrade both bcrypt and passlib:
-     ```bash
-     pip install --upgrade bcrypt passlib
-     ```
-
-4. **Database tables not appearing:**
-   - Solution: Make sure your models are properly defined and imported in the init_db.py file and that Base.metadata.create_all() is being called.
-
-5. **Missing dependencies:**
-   - Solution: Ensure all required packages are installed:
-     ```bash
-     pip install fastapi uvicorn sqlalchemy passlib bcrypt python-jose[cryptography] pydantic python-multipart jinja2 python-dotenv
-     ```
-
-6. **JWT related errors:**
-   - Solution: Check that your SECRET_KEY is set correctly and that python-jose is installed with the cryptography extra.
+Feel free to add more details or refine as per the team’s requirements!
