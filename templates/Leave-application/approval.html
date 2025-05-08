@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SnyVotra Leave Management</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --gray-light: #f3f4f6;
+      --gray-dark: #1f2937;
+    }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: var(--gray-light);
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--gray-dark);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    label {
+      margin-top: 1rem;
+      display: block;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      font-size: 1rem;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    .btn-success { background: var(--success); }
+    .btn-danger { background: var(--danger); }
+
+    .role-switcher {
+      text-align: right;
+      margin-bottom: 1rem;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .visible {
+      display: block;
+    }
+
+    .card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-top: 1rem;
+      position: relative;
+    }
+
+    .status {
+      font-weight: bold;
+      padding: 0.3rem 0.75rem;
+      border-radius: 0.5rem;
+      display: inline-block;
+    }
+
+    .Pending { background: #fef3c7; color: #92400e; }
+    .Approved { background: #d1fae5; color: #065f46; }
+    .Rejected { background: #fee2e2; color: #991b1b; }
+
+    .file-link {
+      display: inline-block;
+      color: var(--primary);
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .manager-login {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .manager-password {
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h2>SnyVotra Leave Portal</h2>
+    <div class="role-switcher">
+      Role:
+      <select id="roleSelect">
+        <option value="employee">Employee</option>
+        <option value="manager">Manager</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Employee Section -->
+  <div id="employeeSection" class="section visible">
+    <h3>📝 Apply for Leave</h3>
+    <form id="leaveForm">
+      <label>Your Name</label>
+      <input type="text" id="name" required />
+
+      <label>Leave Type</label>
+      <select id="type">
+        <option>Casual</option>
+        <option>Sick</option>
+        <option>Earned</option>
+      </select>
+
+      <label>From</label>
+      <input type="date" id="from" required />
+
+      <label>To</label>
+      <input type="date" id="to" required />
+
+      <label>Reason</label>
+      <textarea id="reason" rows="3" required></textarea>
+
+      <label>Upload Document</label>
+      <input type="file" id="file" />
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <div id="employeeLeaves"></div>
+  </div>
+
+  <!-- Manager Section -->
+  <div id="managerSection" class="section">
+    <div id="managerLogin">
+      <h3>🔐 Manager Login</h3>
+      <div class="manager-login">
+        <input type="password" id="managerPassword" class="manager-password" placeholder="Enter Manager Password" />
+        <button onclick="checkManagerPassword()">Login</button>
+      </div>
+    </div>
+    <div id="managerPanel" style="display:none;">
+      <h3>🛠 Manager Panel</h3>
+      <div id="managerLeaves"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const roleSelect = document.getElementById('roleSelect');
+  const employeeSection = document.getElementById('employeeSection');
+  const managerSection = document.getElementById('managerSection');
+  const managerLogin = document.getElementById('managerLogin');
+  const managerPanel = document.getElementById('managerPanel');
+  const passwordInput = document.getElementById('managerPassword');
+
+  const form = document.getElementById('leaveForm');
+  const fileInput = document.getElementById('file');
+  const employeeLeaves = document.getElementById('employeeLeaves');
+  const managerLeaves = document.getElementById('managerLeaves');
+
+  let requests = JSON.parse(localStorage.getItem('leaveRequests')) || [];
+
+  roleSelect.addEventListener('change', () => {
+    if (roleSelect.value === 'employee') {
+      employeeSection.classList.add('visible');
+      managerSection.classList.remove('visible');
+    } else {
+      employeeSection.classList.remove('visible');
+      managerSection.classList.add('visible');
+    }
+  });
+
+  function checkManagerPassword() {
+    if (passwordInput.value === '123456') {
+      managerLogin.style.display = 'none';
+      managerPanel.style.display = 'block';
+      renderManager();
+    } else {
+      alert('Incorrect password.');
+    }
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const file = fileInput.files[0];
+    const request = {
+      name: document.getElementById('name').value,
+      type: document.getElementById('type').value,
+      from: document.getElementById('from').value,
+      to: document.getElementById('to').value,
+      reason: document.getElementById('reason').value,
+      file: file ? file.name : '',
+      status: 'Pending',
+      timestamp: new Date().toLocaleString()
+    };
+    requests.unshift(request);
+    localStorage.setItem('leaveRequests', JSON.stringify(requests));
+    form.reset();
+    renderEmployee();
+  });
+
+  function renderEmployee() {
+    employeeLeaves.innerHTML = "<h4>Your Applications</h4>";
+    requests.forEach(req => {
+      employeeLeaves.innerHTML += `
+        <div class="card">
+          <strong>${req.name}</strong> | ${req.type} (${req.from} to ${req.to})<br/>
+          ${req.reason}<br/>
+          ${req.file ? `<div class="file-link">📎 ${req.file}</div>` : ''}
+          <span class="status ${req.status}">${req.status}</span><br/>
+          <small>🕒 ${req.timestamp}</small>
+        </div>
+      `;
+    });
+  }
+
+  function renderManager() {
+    managerLeaves.innerHTML = "";
+    requests.forEach((req, index) => {
+      managerLeaves.innerHTML += `
+        <div class="card">
+          <strong>${req.name}</strong> | ${req.type} (${req.from} to ${req.to})<br/>
+          ${req.reason}<br/>
+          ${req.file ? `<div class="file-link">📎 ${req.file}</div>` : ''}
+          <span class="status ${req.status}">${req.status}</span><br/>
+          <small>🕒 ${req.timestamp}</small><br/>
+          ${req.status === 'Pending' ? `
+            <button class="btn-success" onclick="updateStatus(${index}, 'Approved')">Approve</button>
+            <button class="btn-danger" onclick="updateStatus(${index}, 'Rejected')">Reject</button>
+          ` : ''}
+        </div>
+      `;
+    });
+  }
+
+  function updateStatus(index, status) {
+    requests[index].status = status;
+    localStorage.setItem('leaveRequests', JSON.stringify(requests));
+    renderManager();
+    renderEmployee();
+  }
+
+  window.updateStatus = updateStatus;
+
+  // Initial render
+  renderEmployee();
+</script>
+</body>
+</html>
